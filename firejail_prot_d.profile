@@ -7,12 +7,22 @@ include bitcoin-qt.local
 include globals.local
 
 ### need to add this line to add in screen sessions >> is in disable-shell.inc
-#~ ignore noexec ${PATH}/bash
-#~ noblacklist ${PATH}/bash
+ignore noexec ${PATH}/bash
+noblacklist ${PATH}/bash
 
-### blacklisting exceptions
+### home directory mkdir/ mkfile / whitelisting / noblacklisting / read-only
+mkdir ${HOME}/.bitcoin
+mkdir ${HOME}/.config/Bitcoin
+
+whitelist ${HOME}/.bitcoin
 noblacklist ${HOME}/.bitcoin
+
+whitelist ${HOME}/.config/Bitcoin
 noblacklist ${HOME}/.config/Bitcoin
+
+whitelist ${HOME}/cc_bin_path
+read-only ${HOME}/cc_bin_path
+noblacklist ${HOME}/cc_bin_path
 
 ### basic blacklisting
 include disable-common.inc
@@ -24,15 +34,7 @@ include disable-programs.inc
 #~ include disable-shell.inc
 include disable-xdg.inc
 
-### home directory whitelisting
-mkdir ${HOME}/.bitcoin
-mkdir ${HOME}/.config/Bitcoin
-
-whitelist ${HOME}/.bitcoin
-whitelist ${HOME}/.config/Bitcoin
-
-whitelist ${HOME}/cc_bitcoin_bin_path
-
+### whitelisting
 include whitelist-common.inc
 
 ### filesystem
@@ -70,6 +72,7 @@ machine-id
 no3d
 nodvd
 nogroups
+### MUST HAVE nonewprivs >> This ensures that child processes cannot acquire new privileges using execve(2)
 nonewprivs
 noroot
 nosound

@@ -10,9 +10,17 @@ include globals.local
 ignore noexec ${PATH}/bash
 noblacklist ${PATH}/bash
 
-### blacklisting exceptions
+### home directory mkdir/ mkfile / whitelisting / noblacklisting / read-only
+mkdir ${HOME}/.bitcoin
+mkfile ${HOME}/.bitcoin/bitcoin.conf
+
+whitelist ${HOME}/.bitcoin/bitcoin.conf
 read-only ${HOME}/.bitcoin/bitcoin.conf
 noblacklist ${HOME}/.bitcoin/bitcoin.conf
+
+whitelist ${HOME}/cc_bin_path
+read-only ${HOME}/cc_bin_path
+noblacklist ${HOME}/cc_bin_path
 
 ### basic blacklisting
 include disable-common.inc
@@ -23,13 +31,6 @@ include disable-passwdmgr.inc
 include disable-programs.inc
 include disable-shell.inc
 include disable-xdg.inc
-
-### home directory whitelisting
-mkdir ${HOME}/.bitcoin
-
-whitelist ${HOME}/.bitcoin
-
-whitelist ${HOME}/cc_bitcoin_bin_path
 
 private-dev
 #~ private-etc drirc,fonts,os-release,xdg,gtk-3.0,selinux,localtime,timezone,resolv.conf,hosts,group,passwd,
@@ -47,6 +48,7 @@ dbus-system=none
 dbus-user=none
 nodvd
 nogroups
+### MUST HAVE nonewprivs >> This ensures that child processes cannot acquire new privileges using execve(2)
 nonewprivs
 noroot
 nosound
@@ -69,4 +71,4 @@ netfilter
 ### environment
 shell none
 
-memory-deny-write-execute
+#~ memory-deny-write-execute

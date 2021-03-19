@@ -42,7 +42,7 @@ cc_export_CXX=""
 cc_git_src="https://github.com/litecoin-project/litecoin.git"
 cc_git_branch="origin/0.18"
 
-cc_wallet_type=${BLOCKwallet}
+cc_wallet_type=${LTCwallet}
 
 cc_make_cpu_cores=2
 cc_make_depends="bdb"
@@ -51,4 +51,4 @@ cc_configure_gui_yes='./configure LDFLAGS="-L`pwd`/depends/${cc_archdir}/lib/" C
 
 cc_configure_gui_no='./configure LDFLAGS="-L`pwd`/depends/${cc_archdir}/lib/" CPPFLAGS="-I`pwd`/depends/${cc_archdir}/include/" --disable-bench --disable-gui-tests --disable-tests --enable-reduce-exports --enable-static --with-gui=no'
 
-source "dxbot_node_user_cc.sh"
+cc_command_pre_make=""

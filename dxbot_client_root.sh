@@ -1,11 +1,25 @@
 #!/bin/bash
 
-source "dxbot_cfg.sh"
+# config file name read and include
+dxbot_config_file_arg=$1
+if [ "${dxbot_config_file_arg}" = "" ]; then
+    echo "ERROR: first parameter, which is config file parameter can not be empty"
+    exit 1
+fi
+
+if [ ! -f "${dxbot_config_file_arg}" ]; then
+    echo "ERROR: config file ${dxbot_config_file_arg} does not exist"
+    exit 1
+fi
+
+echo "using config file <${dxbot_config_file_arg}>:"
+
+source "${dxbot_config_file_arg}"
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 008.001 >> client >> root >> tor install >> tor config >> add hidden service v3 auth_private file for ssh client authentication over tor"
+echo "# ${0} >> root@${clientalias} >> tor install >> tor config >> add hidden service v3 auth_private file for ssh client authentication over tor"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -25,13 +39,12 @@ echo ""
 if [ "$key" = "c" ]; then
     if [ "$sshtoraccess" = "sshtoraccessyes" ]; then
         
-        apt install tor
-        if [ $? -ne 0 ]; then
-            echo "ERROR: install software dependencies by @client error"
-            exit 1
-        fi
+        echo "# ${0} >> root@${clientalias} >> tor install >> try"
         
-        echo "trying to update client tor configuration about directory for as client to node authorisation"
+        apt install tor
+        (test $? != 0) && echo "ERROR: install tor package on root@${clientalias} failed" && exit 1
+        
+        echo "# ${0} >> root@${clientalias} >> tor configuration update >> try"
         
         cfgvar='ClientOnionAuthDir'
         cfgval='/var/lib/tor/onion_auth'
@@ -44,19 +57,15 @@ if [ "$key" = "c" ]; then
         fi
         
         cat "${cfgfile}" | grep "^${cfgvar}" | grep "${cfgval}"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>" && exit 1
         
         # check tor directory used for storing client auth private keys for hs
         torauthclientsdir="/var/lib/tor/onion_auth/"
 
         mkdir -p ${torauthclientsdir} && cd ${torauthclientsdir} && chown debian-tor:debian-tor . && chmod 700 .
-        if [ $? -ne 0 ]; then
-            echo "ERROR: directory <${torauthclientsdir}> processing failed"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: directory <${torauthclientsdir}> processing failed" && exit 1
+        
+        echo "# ${0} >> root@${clientalias} >> tor copy auth file >> try"
         
         #generate key name
         keyname="${clientalias}2${nodealias}"
@@ -65,40 +74,27 @@ if [ "$key" = "c" ]; then
         torgenkeysdir="/root/private_ssl_keys"
         
         mkdir -p ${torgenkeysdir} && cd ${torgenkeysdir} && chmod 700 .
-        if [ $? -ne 0 ]; then
-            echo "ERROR: directory <${torgenkeysdir}> processing failed"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: directory <${torgenkeysdir}> processing failed" && exit 1
         
         # copy formated private key to nodeuser2 installtion directory
         cp ${dxbot_dir_local_setup}${keyname}.auth_private ${torauthclientsdir} && chmod 700 ${torauthclientsdir}${keyname}.auth_private && chown $nodeuser2 ${torauthclientsdir}${keyname}.auth_private && mv ${dxbot_dir_local_setup}${keyname}.auth_private ${torgenkeysdir}${keyname}.auth_private && chmod 700 ${torgenkeysdir}${keyname}.auth_private && chown root ${torgenkeysdir}${keyname}.auth_private
-        if [ $? -ne 0 ]; then
-            echo "ERROR: <${torauthclientsdir}${keyname}.auth_private> copy failed"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: <${torauthclientsdir}${keyname}.auth_private> copy failed" && exit 1
         
         echo "ssh ${nodeuser2}@`cat ${torgenkeysdir}${keyname}.auth_private | cut -d ':' -f1`.onion" > ${dxbot_dir_local_setup}${keyname}.sh && chown ${nodeuser2} ${dxbot_dir_local_setup}${keyname}.sh
-        if [ $? -ne 0 ]; then
-            echo "ERROR: <${dxbot_dir_local_setup}${keyname}.sh> file generate failed"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: <${dxbot_dir_local_setup}${keyname}.sh> file generate failed" && exit 1
         
         # restart tor service
         /usr/sbin/service tor restart
         
-        echo "trying to update client ${localuser} for tor usage ability"
+        echo "# ${0} >> root@${clientalias} >> tor update about new user ${localuser}"
         
+        # if localuser is not in tor group, try to add it
         groups ${localuser} | grep "debian-tor"
         if [ $? -ne 0 ]; then
             /usr/sbin/usermod -a -G debian-tor ${localuser}
-            if [ $? -ne 0 ]; then
-                echo "ERROR: failed to add user <${localuser}> to group <debian-tor>"
-                exit 1
-            fi
+            (test $? != 0) && echo "ERROR: failed to add user <${localuser}> to group <debian-tor>" && exit 1
         fi
         
-        echo "update ${localuser} for tor usage ability success"
-        
-        echo "client >> root >> tor config >> create hidden service v3 auth directory for client and copy auth file success"
+        echo "# ${0} >> root@${clientalias} >> tor install >> tor config >> add hidden service v3 auth_private file for ssh client authentication over tor >> try >> success"
     fi
 fi

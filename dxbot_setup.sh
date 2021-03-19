@@ -3,7 +3,7 @@
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 000 >> Welcome in Blocknet dxbot ecosystem remote setup for Debian Linux"
+echo "# ${0} >> Welcome in Blocknet dxbot ecosystem remote setup for Debian Linux"
 echo ""
 echo "first please edit <dxbot_cfg_example1.sh> as your wishes are and run dxbot setup like:"
 echo "bash ./dxbot_setup.sh dxbot_cfg_example1.sh"
@@ -37,11 +37,11 @@ if [ "$key" != "Y" ]; then
     echo -e "\nsetup cancelled"
     exit 0
 fi
-    
+
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 001 >> client >> Configuration verification"
+echo "# ${0} >> Configuration verification"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <q> to exit setup process: " key
@@ -55,25 +55,27 @@ while true; do
 done
 echo ""
 
+echo "# ${0} >> Configuration verification >> try"
+
 # config file name read and include
-cfgfile=$1
-if [ "$cfgfile" = "" ] || [ "$cfgfile" = "dxbot_cfg.sh" ]; then
-    echo "ERROR: first parameter, which is config file parameter can not be empty also can not be <dxbot_cfg.sh> because used as temporary file"
-    echo "Please make copy and edit <dxbot_cfg_example1.sh> as your wishes are and run dxbot setup ie like:"
+dxbot_config_file_arg=$1
+if [ "${dxbot_config_file_arg}" = "" ]; then
+    echo "ERROR: first parameter, which is config file parameter can not be empty"
+    echo "Please make copy and edit <dxbot_cfg_example1.sh> as your wishes are and run dxbot setup, ie like:"
     echo "bash ./dxbot_setup.sh dxbot_cfg_node1.sh"
     exit 1
 fi
 
-if [ ! -f "$cfgfile" ]; then
-    echo "ERROR: config file ${cfgfile} does not exist"
+if [ ! -f "${dxbot_config_file_arg}" ]; then
+    echo "ERROR: config file ${dxbot_config_file_arg} does not exist"
     exit 1
 fi
 
-echo "using config file <${cfgfile}>:"
-cat ${cfgfile} | grep -v "^#" | grep "="
+echo "using config file <${dxbot_config_file_arg}>:"
+cat ${dxbot_config_file_arg} | grep -v "^#" | grep "="
 echo ""
 
-source "${cfgfile}"
+source "${dxbot_config_file_arg}"
  
 # client name read
 if [ "$clientalias" = "" ]; then
@@ -229,16 +231,21 @@ echo "using PIVXwallet: $PIVXwallet"
 #~ fi
 #~ echo "using XMRwallet: $XMRwallet"
 
+localuser=`id -un`
 dxbot_dir_local_setup=`pwd`
-
-(test ${dxbot_dir_local_setup} = ${dxbot_dir_remote_root}) && (echo "dxbot setup installation files and remote node dxbot setup installation directory can not be same, please change <dxbot_dir_remote_root> directory parameter in <${cfgfile}> configuration file and try to run setup..." && exit 1)
-
 dxbot_dir_remote_setup=${dxbot_dir_remote_root}"/dxbotsetup/"
+
+(test ${dxbot_dir_local_setup} = ${dxbot_dir_remote_root}) && echo "dxbot setup installation files and remote node dxbot setup installation directory can not be same, please change <dxbot_dir_remote_root> directory parameter in <${dxbot_config_file_arg}> configuration file and try to run setup..." && exit 1
+
+echo "# ${0} >> Configuration verification >> try >> success"
+
+mkdir -p ~/.ssh/active_sessions && chmod 700 ~/.ssh/active_sessions
+(test $? != 0) && echo "ERROR: failed to create directory for master ssh channel" && exit 1
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 002 >> client >> Exporting configuration to file"
+echo "# ${0} >> ${localuser}@${clientalias} >> Exporting configuration to file"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <q> to exit setup process: " key
@@ -253,25 +260,23 @@ done
 echo ""
 
 # export config to file
-dxbot_config_file="dxbot_cfg.sh"
+dxbot_config_file_gen=${dxbot_config_file_arg}".gen.sh"
 
-cp ${cfgfile} ${dxbot_config_file} && echo "
-localuser=$USER
+echo "# ${0} >> ${localuser}@${clientalias} >> Exporting configuration to ${dxbot_config_file_gen} >> try"
+
+cp ${dxbot_config_file_arg} ${dxbot_config_file_gen} && echo "
+localuser=${localuser}
 dxbot_dir_local_setup=$dxbot_dir_local_setup
-dxbot_dir_remote_root=$dxbot_dir_remote_root
 dxbot_dir_remote_setup=$dxbot_dir_remote_setup
-" >> $dxbot_config_file
-if [ $? -ne 0 ]; then
-    echo "configuration export top file failed: $dxbot_config_file"
-    exit 1
-fi
+" >> ${dxbot_config_file_gen}
+(test $? != 0) && echo "ERROR: Exporting configuration to ${dxbot_config_file_gen} failed" && exit 1
 
-echo "configuration has been successfully exported to: $dxbot_config_file"
+echo "# ${0} >> ${localuser}@${clientalias} >> Exporting configuration to ${dxbot_config_file_gen} >> try >> success"
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 003 >> root@node >> check or create $nodeuser2@node"
+echo "# ${0} >> root@${nodealias} >> check or create user ${nodeuser2}@${nodealias)"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -289,21 +294,24 @@ done
 echo ""
 
 if [ "$key" = "c" ]; then
-    ssh -t ${nodeuser2}@${nodeip} "echo ${nodeuser2} already exist"
+    echo "# ${0} >> root@${nodealias} >> check or create user ${nodeuser2}@${nodealias) >> try"
+    
+    ssh -o "ControlMaster=auto" -o "ControlPath=~/.ssh/active_sessions/%C" -o "ControlPersist=600" -t ${nodeuser1}@${nodeip} \
+    "(id ${nodeuser2}) || (echo -ne 'User ${nodeuser2} does not exist. To create user please enter root ' && su -c 'adduser ${nodeuser2})'"
+    # in case of rerunning dxbot setup and user already exists and ssh by private key to user2 is allowed only...
     if [ $? -ne 0 ]; then
-        ssh -t ${nodeuser1}@${nodeip} "echo -n 'Enter root ' && su -c 'id $nodeuser2 || (echo creating$nodeuser2 && adduser $nodeuser2)'"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: dxbot process failed on root@node"
-            exit 1
-        fi
+        ssh -o "ControlMaster=auto" -o "ControlPath=~/.ssh/active_sessions/%C" -o "ControlPersist=600" -t ${nodeuser2}@${nodeip} \
+        "id"
     fi
-    echo "creating/check for $nodeuser2 on node success"
+    (test $? != 0) && echo "ERROR: check or create user ${nodeuser2}@${nodealias) failed" && exit 1
+    
+    echo "# ${0} >> root@${nodealias} >> check or create user ${nodeuser2}@${nodealias) >> try >> success"
 fi
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 004 >> Generating/Exporting ssh public key from client to $nodeuser2@node to be able to login/installation without password"
+echo "# ${0} >> ${localuser}@${clientalias} >> Check/Generate+Export SSH public key to ${nodeuser1}@${nodealias}"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -325,32 +333,36 @@ sshkey="$HOME/.ssh/id_ed25519.pub"
 #~ sshkey="$HOME/.ssh/id_ed25519test"
 
 if [ "$key" = "c" ]; then
+    
     if [ "$sshpkexport" = "sshpkexportyes" ]; then
+        
+        echo "# ${0} >> ${localuser}@${clientalias} >> Check/Generate+Export SSH public key to ${nodeuser1}@${nodealias} >> try"
+        
         if [ ! -f "$sshkey" ]; then
-            echo "ssh key <$sshkey> does not exist. generating one"
+            echo "ssh key <${sshkey}> does not exist >> generating one"
             ssh-keygen -t ed25519 -a 100 -f $sshkey
             if [ $? -ne 0 ] || [ ! -f "$sshkey" ]; then
                 echo "ERROR: failed to generated ssh key for export"
                 exit 1
             fi
+        else
+            echo "ssh key <${sshkey}> already exist >> using existing"
         fi
         
-        echo "trying to export ssh key <$sshkey>"
+        echo "trying to export ssh key <$sshkey> with ssh-copy-id"
         
-        /usr/bin/ssh-copy-id -i ${sshkey} ${nodeuser2}@${nodeip}
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to export public keyt from client to node"
-            exit 1
-        fi
+        /usr/bin/ssh-copy-id -o "ControlMaster=auto" -o "ControlPath=~/.ssh/active_sessions/%C" -o "ControlPersist=600" -t ${nodeuser2}@${nodeip} \
+        -i ${sshkey} ${nodeuser2}@${nodeip}
+        (test $? != 0) && echo "ERROR: failed to export public keyt from client to node" && exit 1
         
-        echo "ssh key <$sshkey> has been successfully exported"
+        echo "# ${0} >> ${localuser}@${clientalias} >> Check/Generate+Export SSH public key to ${nodeuser1}@${nodealias} >> try >> success"
     fi
 fi
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 005 >> Copying installation from client to $nodeuser2@node"
+echo "# ${0} >> ${localuser}@${clientalias} >> copying setup files to ${nodeuser1}@${nodealias}"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -368,39 +380,49 @@ done
 echo ""
 
 if [ "$key" = "c" ]; then
-
-    echo "creating installation directories on node"
-    ssh ${nodeuser2}@${nodeip} "mkdir -p $dxbot_dir_remote_setup && chmod 700 $dxbot_dir_remote_setup"
-    if [ $? -ne 0 ]; then
-        echo "ERROR: failed to create installation directories"
-        exit 1
+    
+    echo "# ${0} >> ${localuser}@${clientalias} >> copying setup files to ${nodeuser1}@${nodealias} >> try"
+    
+    echo "creating installation directories"
+    ssh -o "ControlMaster=auto" -o "ControlPath=~/.ssh/active_sessions/%C" -o "ControlPersist=600" -t ${nodeuser2}@${nodeip} \
+    "mkdir -p $dxbot_dir_remote_setup && chmod 700 $dxbot_dir_remote_setup"
+    (test $? != 0) && echo "ERROR: failed to create installation directories" && exit 1
+    
+    if [ "${BLOCKwalletrestore}" != "" ]; then
+        ps ux | grep -v grep | grep -i -e "blocknet"
+        (test $? = 0) && echo "ERROR: Blocknet wallet.dat file has been set to restore but seems like process is running" && exit 1
+        
+        cp ${BLOCKwalletrestore} ./blocknet.wallet.dat
+    fi
+    
+    if [ "${LTCwalletrestore}" != "" ]; then
+        ps ux | grep -v grep | grep -i -e "litecoin"
+        (test $? = 0) && echo "ERROR: Litecoin wallet.dat file has been set to restore but seems like progress is running" && exit 1
+        
+        cp ${LTCwalletrestore} ./litecoin.wallet.dat
     fi
     
     echo "packing up all installation files"
-    tar -czf dxbotsetup.tar.gz --exclude=dxbotsetup.tar.gz *
-    (test $? = 0) || (echo "installation files pack failed" && exit 1)
+    tar -czf ${clientalias}2${nodealias}.tar.gz dxbot_node_root* dxbot_node_user* firejail* cmd* *.wallet.dat ${dxbot_config_file_gen}
+    (test $? != 0) && echo "ERROR: installation files pack failed" && exit 1
     
     echo "copying installation files to node"
-    scp "dxbotsetup.tar.gz" ${nodeuser2}@${nodeip}:${dxbot_dir_remote_setup}
-    if [ $? -ne 0 ]; then
-        echo "ERROR: failed to copy installtion files to node"
-        exit 1
-    fi
+    scp -o "ControlMaster=auto" -o "ControlPath=~/.ssh/active_sessions/%C" -o "ControlPersist=600" \
+    ${clientalias}2${nodealias}.tar.gz ${nodeuser2}@${nodeip}:${dxbot_dir_remote_setup}
+    (test $? != 0) && echo "ERROR: failed to copy installation files to node" && exit 1
     
     echo "extracting node installation files"
-    ssh ${nodeuser2}@${nodeip} "cd $dxbot_dir_remote_setup && tar xvzf dxbotsetup.tar.gz -C ./"
-    if [ $? -ne 0 ]; then
-        echo "ERROR: failed to create installation directories"
-        exit 1
-    fi
+    ssh -o "ControlMaster=auto" -o "ControlPath=~/.ssh/active_sessions/%C" -o "ControlPersist=600" -t ${nodeuser2}@${nodeip} \
+    "cd ${dxbot_dir_remote_setup} && tar xvzf ${clientalias}2${nodealias}.tar.gz -C ./"
+    (test $? != 0) && echo "ERROR: failed to extract installation files" && exit 1
     
-    echo "files has been successfully copied from client to node"
+    echo "# ${0} >> ${localuser}@${clientalias} >> copying setup files to ${nodeuser1}@${nodealias} >> try >> success"
 fi
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 006 >> root@node >> processing installation"
+echo "# ${0} >> root@${nodealias} >> processing installation as root on node"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -418,20 +440,19 @@ done
 echo ""
 
 if [ "$key" = "c" ]; then
-    echo "dxbotsetup on node as root..."
-    ssh -t ${nodeuser2}@${nodeip} "echo -n 'Enter root ' && su -c 'cd $dxbot_dir_remote_setup && bash ./dxbot_node_root.sh'"
-    if [ $? -ne 0 ]; then
-        echo "ERROR: dxbot process failed on root@node"
-        exit 1
-    fi
+    echo "# ${0} >> root@${nodealias} >> processing installation as root on node >> try"
+    
+    ssh -o "ControlMaster=auto" -o "ControlPath=~/.ssh/active_sessions/%C" -o "ControlPersist=600" -t ${nodeuser2}@${nodeip} \
+    "echo -n 'Enter root ' && su -c 'cd $dxbot_dir_remote_setup && bash ./dxbot_node_root.sh ${dxbot_config_file_gen}'"
+    (test $? != 0) && echo "ERROR: processing dxbot setup installer on root@node failed" && exit 1
 
-    echo "node installation by root success"
+    echo "# ${0} >> root@${nodealias} >> processing installation as root on node >> try >> success"
 fi
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 007 >> copying generated files from $nodeuser2@node to client"
+echo "# ${0} >> ${nodeuser1}@${nodealias} >> copying generated files to ${localuser}@${clientalias}"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -449,22 +470,20 @@ done
 echo ""
 
 if [ "$key" = "c" ]; then
-    # copy generated files from node to client
-    echo "copying generated files from node to client"
+    echo "# ${0} >> ${nodeuser1}@${nodealias} >> copying generated files to ${localuser}@${clientalias} >> try"
+    
     keyname="${clientalias}2${nodealias}"
-    cd ${dxbot_dir_local_setup} && scp $nodeuser2@$nodeip:${dxbot_dir_remote_setup}"/"${keyname}.auth_private ./
-    if [ $? -ne 0 ]; then
-        echo "ERROR: failed to copy installtion files to node"
-        exit 1
-    fi
+    cd ${dxbot_dir_local_setup} && scp -o "ControlMaster=auto" -o "ControlPath=~/.ssh/active_sessions/%C" -o "ControlPersist=600" \
+    $nodeuser2@$nodeip:${dxbot_dir_remote_setup}"/"${keyname}.auth_private ./
+    (test $? != 0) && echo "ERROR: copy generated files from node to client failed" && exit 1
 
-    echo "copy generated files back from server to client success"
+    echo "# ${0} >> ${nodeuser1}@${nodealias} >> copying generated files to ${localuser}@${clientalias} >> try >> success"
 fi
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 008 >> root@client >> processing installation"
+echo "# ${0} >> root@${clientalias} >> processing installation"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -482,21 +501,18 @@ done
 echo ""
 
 if [ "$key" = "c" ]; then
-    # processing installations script on root@client
-    echo "dxbotsetup on root@client..."
-    cd ${dxbot_dir_local_setup} && echo -n 'Enter root ' && su -c 'bash ./dxbot_client_root.sh'
-    if [ $? -ne 0 ]; then
-        echo "ERROR: dxbot process failed on root@client"
-        exit 1
-    fi
+    echo "# ${0} >> root@${clientalias} >> processing installation >> try"
+    
+    cd ${dxbot_dir_local_setup} && echo -n 'Enter root ' && su -c 'bash ./dxbot_client_root.sh ${dxbot_config_file_gen}'
+    (test $? != 0) && echo "ERROR: dxbot process failed on root@${clientalias}" && exit 1
 
-    echo "node installation by root success"
+    echo "# ${0} >> root@${clientalias} >> processing installation >> try >> success"
 fi
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 009 >> $nodeuser2@node >> processing installation"
+echo "# ${0} >> ${nodeuser1}@${nodealias} >> build and configure wallets, configure dxbot and generate scripts"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -514,21 +530,19 @@ done
 echo ""
 
 if [ "$key" = "c" ]; then
-    echo "trying >> download >> build >> generate configuration for wallets and scripts"
+    echo "# ${0} >> ${nodeuser1}@${nodealias} >> build and configure wallets, configure dxbot and generate scripts >> try"
+    
+    ssh -o "ControlMaster=auto" -o "ControlPath=~/.ssh/active_sessions/%C" -o "ControlPersist=600" -t ${nodeuser2}@${nodeip} \
+    "cd ${dxbot_dir_remote_setup} && bash ./dxbot_node_user.sh ${dxbot_config_file_gen}'"
+    (test $? != 0) && echo "ERROR: dxbot process failed on ${nodeuser1}@${nodealias}" && exit 1
 
-    ssh -t ${nodeuser2}@${nodeip} "cd ${dxbot_dir_remote_setup} && bash ./dxbot_node_user.sh'"
-    if [ $? -ne 0 ]; then
-        echo "ERROR: dxbot process failed on user@node"
-        exit 1
-    fi
-
-    echo "trying >> download >> build >> generate configuration for wallets and scripts success"
+    echo "# ${0} >> ${nodeuser1}@${nodealias} >> build and configure wallets, configure dxbot and generate scripts >> try  success"
 fi
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 010 >> @client >> generating connect scripts >> finalizing installation"
+echo "# ${0} >> ${nodeuser1}@${nodealias} >> generating connect scripts >> finalizing installation"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -546,7 +560,7 @@ done
 echo ""
 
 if [ "$key" = "c" ]; then
-    echo "trying >> generate connect scripts"
+    echo "# ${0} >> ${nodeuser1}@${nodealias} >> generating connect scripts >> finalizing installation >> try"
     
     #~ TODO generate SSH and RD connect scripts
     #~ ssh -t $nodeuser2@$nodeip "cd ${dxbot_dir_remote_setup} && bash ./dxbot_node_user.sh'"
@@ -555,7 +569,7 @@ if [ "$key" = "c" ]; then
         #~ exit 1
     #~ fi
     
-    echo "trying >> generate connect scripts >> success"
+    echo "# ${0} >> ${nodeuser1}@${nodealias} >> generating connect scripts >> finalizing installation >> try >> success"
 fi
 
 echo 0

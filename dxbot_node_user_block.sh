@@ -17,6 +17,8 @@ rpcworkqueue=256
 
 # to boost up sync with some clear net nodes
 cc_nodes_clearnet='
+54.158.97.146:41412
+62.171.146.255:41412
 '
 
 # to boost up sync with some onion nodes
@@ -53,3 +55,5 @@ cc_make_depends="bdb boost"
 cc_configure_gui_yes='./configure LDFLAGS="-L`pwd`/depends/${cc_archdir}/lib/" CPPFLAGS="-I`pwd`/depends/${cc_archdir}/include/" --with-boost-libdir=`pwd`/depends/${cc_archdir}/lib/ --disable-bench --disable-gui-tests --disable-tests --enable-reduce-exports --enable-static --with-gui=auto'
 
 cc_configure_gui_no='./configure LDFLAGS="-L`pwd`/depends/${cc_archdir}/lib/" CPPFLAGS="-I`pwd`/depends/${cc_archdir}/include/" --with-boost-libdir=`pwd`/depends/${cc_archdir}/lib/ --disable-bench --disable-gui-tests --disable-tests --enable-reduce-exports --enable-static --with-gui=no'
+
+cc_command_pre_make=""

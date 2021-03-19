@@ -27,16 +27,16 @@ if [ "$key" = "c" ]; then
     echo "# ${0} >> ${nodeuser1}@${nodealias} >> dxbot >> git clone source code >> try"
     
     cd ${dxbot_dir_remote_root}
-    (test $? = 0) || (echo "cd ${dxbot_dir_remote_root} failed" && exit 1)
+    (test $? != 0) && echo "cd ${dxbot_dir_remote_root} failed" && exit 1
 
     mkdir -p dxbot && cd dxbot
-    (test $? = 0) || (echo "mkdir -p dxbot failed" && exit 1)
+    (test $? != 0) && echo "mkdir -p dxbot failed" && exit 1
     
     git clone https://github.com/nnmfnwl7/dxmakerbot.git .
     if [ $? != 0 ]; then
         if [ $? == 128 ]; then
             git pull
-            (test $? = 0) || (echo "git pull failed" && exit 1)
+            (test $? != 0) && echo "git pull failed" && exit 1
         else
             echo "git clone dxbot source code failed"
             exit 1
@@ -44,7 +44,7 @@ if [ "$key" = "c" ]; then
     fi
     
     git checkout origin/fazer_dxmakerbot_latest_alfa
-    (test $? = 0) || (echo "checkout dxbot alfa version failed" && exit 1)
+    (test $? != 0) && echo "checkout dxbot alfa version failed" && exit 1
     
     echo "
 # dxsetting dxbot setup update:
@@ -53,14 +53,14 @@ rpcport = 41414
 rpcuser = '`cat ~/.blocknet/blocknet.conf | grep rpcuser | cut -d "=" -f2`'
 rpcpassword = '`cat ~/.blocknet/blocknet.conf | grep rpcpassword | cut -d "=" -f2`'
     " >> utils/dxsettings.py
-    (test $? = 0) || (echo "generate ${cfgfile} failed" && exit 1)
+    (test $? != 0) && echo "generate ${cfgfile} failed" && exit 1
 
     # copy example dxmakerbot v2 configurations
     cp howto/examples/bot_v2_sell_block_buy_ltc.py ./bot_v2_sell_block_buy_ltc.py
-    (test $? = 0) || (echo "example config copy failed" && exit 1)
+    (test $? != 0) && echo "example config copy failed" && exit 1
     
     cp howto/examples/bot_v2_sell_ltc_buy_block.py ./bot_v2_sell_ltc_buy_block.py
-    (test $? = 0) || (echo "example config copy failed" && exit 1)
+    (test $? != 0) && echo "example config copy failed" && exit 1
 
     # usefull command to check configuration file
     #~ cat  bot_v2_sell_block_buy_ltc.py | grep -v "#" | grep "\"--"
@@ -97,6 +97,7 @@ done
 echo ""
 
 if [ "$key" = "c" ]; then
+    echo "# ${0} >> ${nodeuser1}@${nodealias} >> generate Blocknet xBridge configuration file >> try"
     
     cc_xbridge_file="xbridge.conf"
     
@@ -142,6 +143,7 @@ FullLog=true
 ShowAllOrders=true
 ${cc_xbridge_configs}
     " >> ${cc_xbridge_file}
-    (test $? = 0) || (echo "generate ${cc_xbridge_file} failed" && exit 1)
+    (test $? != 0) && echo "generate ${cc_xbridge_file} failed" && exit 1
     
+    echo "# ${0} >> ${nodeuser1}@${nodealias} >> generate Blocknet xBridge configuration file >> try >> success"
 fi

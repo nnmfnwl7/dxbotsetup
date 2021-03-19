@@ -11,7 +11,7 @@
 
 # client machine alias, is machine to be configured to access node from
 # parameter used for config files/private/public keys files naming
-clientalias="client1" 
+clientalias="client1"
 #~ clientalias="mynotebook1"
 
 # node machine alias, is machine where Blockent dxbot+wallets to be installed
@@ -23,7 +23,7 @@ nodealias="node1"
 #~ nodealias='awsvps' # alias for installtion on AWS service
 
 # node machine IP address or hostname.
-#~ nodeip='192.168.10.xx' # in case of local network node be probably IP like this.
+nodeip='192.168.10.xx' # in case of local network node be probably IP like this.
 #~ nodeip='myminipcnode007' # in case of node is running on local network and hostname is set
 #~ nodeip='127.0.0.1' # In case of installing on local machine can be 127.0.0.1/localhost
 
@@ -78,46 +78,58 @@ torhswallet='torhswalletyes'
 clearnetwallet='clearnetwalletno'
 #~ clearnetwallet='clearnetwalletyes'
 
-# compile blocknet as QT wallet + deamon or only as daemon
+# compile wallets with QT interface + daemon or only as daemon or do not compile wallet
+# choose between:
+#   gui - graphical user interface and also daemon wallet
+#   daemon - daemon wallet only
+#   no - do not compile wallet
+
+# blocknet wallet
 BLOCKwallet='gui'
 #~ BLOCKwallet='BLOCKd'
+#~ BLOCKwalletrestore="${HOME}/.blocknet/wallet.dat"
 
-# compile wallets with QT interface + daemon or only as daemon or do not compile wallet
-
-#bitcoin walet
+# bitcoin walet
 BTCwallet='gui' # wallet with qt interface and also as daemon
 #~ BTCwallet='daemon' # compile wallet as daemon only
 #~ BTCwallet='no' # do not compile wallet
+#~ BTCwalletrestore="${HOME}/.bitcoin/wallets/wallet.dat"
 
 # litecoin wallet
 LTCwallet='gui'
 #~ LTCwallet='daemon'
 #~ LTCwallet='no'
+#~ LTCwalletrestore="${HOME}/.litecoin/wallet.dat"
 
 # dash wallet
 DASHwallet='gui'
 #~ DASHwallet='daemon'
 #~ DASHwallet='no'
+#~ DASHwalletrestore="${HOME}/.dashcore/wallet.dat"
 
 # dogecoin wallet
 DOGEwallet='gui'
 #~ DOGEwallet='daemon'
 #~ DOGEwallet='no'
+#~ DOGEwalletrestore="${HOME}/.dogecoin/wallet.dat"
 
 # verge wallet
 XVGwallet='gui'
 #~ XVGwallet='daemon'
 #~ XVGwallet='no'
+#~ XVGwalletrestore="${HOME}/.VERGE/wallets/wallet.dat
 
 # pivx wallet
 PIVXwallet='gui'
 #~ PIVXwallet='daemon'
 #~ PIVXwallet='no'
+#~ PIVXwalletrestore="${HOME}/.pivx/wallet.dat
 
 # monero wallet...coming soon as long atomic swap on monero blockchain are applicable  :)
 #~ XMRwallet='gui'
 #~ XMRwallet='daemon'
 #~ XMRwallet='no'
+#~ XMRwalletrestore="${HOME}/Monero/wallets/${USER}/*
 
 # root of installation directory where source code and binary files are stored
-dxbot_dir_remote_root="/home/${nodeuser2}/cc"
+dxbot_dir_remote_root="/home/${nodeuser2}/ccwallets"

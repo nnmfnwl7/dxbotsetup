@@ -1,11 +1,25 @@
 #!/bin/bash
 
-source "dxbot_cfg.sh"
+# config file name read and include
+dxbot_config_file_arg=$1
+if [ "${dxbot_config_file_arg}" = "" ]; then
+    echo "ERROR: first parameter, which is config file parameter can not be empty"
+    exit 1
+fi
+
+if [ ! -f "${dxbot_config_file_arg}" ]; then
+    echo "ERROR: config file ${dxbot_config_file_arg} does not exist"
+    exit 1
+fi
+
+echo "using config file <${dxbot_config_file_arg}>:"
+
+source "${dxbot_config_file_arg}"
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 007.001 >> user2@node >> checkout and build wallets from source code"
+echo "# ${0} >> ${nodeuser2}@${nodealias} >> checkout and build wallets from source code"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -23,8 +37,11 @@ done
 echo ""
 
 if [ "$key" = "c" ]; then
+    echo "# ${0} >> ${nodeuser2}@${nodealias} >> checkout and build wallets from source code >> try"
+    
     if [ ${BLOCKwallet} = "gui" ] || [ ${BLOCKwallet} = "daemon" ]; then
-        bash ./dxbot_node_user_cc.sh dxbot_node_user_block.sh || (echo "ERROR: Blocknet wallet checkout and install failed" && exit 1)
+        bash ./dxbot_node_user_cc.sh ${dxbot_config_file_arg} dxbot_node_user_block.sh
+        (test $? != 0) && echo "ERROR: Blocknet wallet checkout and build failed" && exit 1
     fi
 
     #~ TODO also apply left wallets configuration files and uncomment code
@@ -34,7 +51,8 @@ if [ "$key" = "c" ]; then
     #~ fi
 
     if [ ${LTCwallet} = "gui" ] || [ ${LTCwallet} = "daemon" ]; then
-        bash ./dxbot_node_user_cc.sh dxbot_node_user_ltc.sh || (echo "ERROR: Litecoin wallet checkout and install failed" && exit 1)
+        bash ./dxbot_node_user_cc.sh ${dxbot_config_file_arg} dxbot_node_user_ltc.sh
+        (test $? != 0) && echo "ERROR: Litecoin wallet checkout and build failed" && exit 1
     fi
 
     #~ if [ ${DASHwallet} = "gui" ] || [ ${DASHwallet} = "daemon" ]; then
@@ -56,13 +74,15 @@ if [ "$key" = "c" ]; then
     #~ if [ ${XMRwallet} = "gui" ] || [ ${XMRwallet} = "daemon" ]; then
         #~ bash ./dxbot_node_user_xmr.sh || (echo "ERROR: Monero wallet checkout and install failed" && exit 1)
     #~ fi
+    
+    echo "# ${0} >> ${nodeuser2}@${nodealias} >> checkout and build wallets from source code >> try >> success"
 fi
 
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 007.002 >> user2@node >> checkout and configure dxbot"
+echo "# ${0} >> ${nodeuser2}@${nodealias} >> checkout and configure dxbot"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -80,7 +100,12 @@ done
 echo ""
 
 if [ "$key" = "c" ]; then
-    bash ./dxbot_node_user_dxbot.sh || (echo "ERROR: Blocknet dxbot install and configure failed" && exit 1)
+    echo "# ${0} >> ${nodeuser2}@${nodealias} >> checkout and configure dxbot >> try"
+    
+    bash ./dxbot_node_user_dxbot.sh
+    (test $? != 0) && echo "ERROR: Blocknet dxbot install and configure failed" && exit 1
+    
+    echo "# ${0} >> ${nodeuser2}@${nodealias} >> checkout and configure dxbot >> try >> success"
 fi
 
 #~ TODO cron user startup by screen or mate-terminal

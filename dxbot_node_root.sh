@@ -1,11 +1,25 @@
 #!/bin/bash
 
-source "dxbot_cfg.sh"
+# config file name read and include
+dxbot_config_file_arg=$1
+if [ "${dxbot_config_file_arg}" = "" ]; then
+    echo "ERROR: first parameter, which is config file parameter can not be empty"
+    exit 1
+fi
+
+if [ ! -f "${dxbot_config_file_arg}" ]; then
+    echo "ERROR: config file ${dxbot_config_file_arg} does not exist"
+    exit 1
+fi
+
+echo "using config file <${dxbot_config_file_arg}>:"
+
+source "${dxbot_config_file_arg}"
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 006.001 >> node >> root >> ssh config >> disable access by password >> allow access by private-key >> optional"
+echo "# ${0} >> root@${nodealias} >> ssh config >> allow access by private-key >> disable access by password >> optional"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -25,7 +39,7 @@ echo ""
 if [ "$key" = "c" ]; then
     if [ "$sshpkonly" = "sshpkonlyyes" ]; then
         
-        echo "trying to update node sshd configuration to allow login by private key"
+        echo "# ${0} >> root@${nodealias} >> ssh config >> allow access by private-key >> try"
         
         cfgvar='PubkeyAuthentication'
         cfgline='PubkeyAuthentication yes'
@@ -33,10 +47,7 @@ if [ "$key" = "c" ]; then
         
         # search and try to update commented by # or PubkeyAuthentication no
         sed -i "s/.*${cfgvar}.*/${cfgline}/" "${cfgfile}"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to update node sshd configuration to allow private-key clients"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: failed to update node sshd configuration to allow access by private-key" && exit 1
         
         # search if "PubkeyAuthentication yes" is not missing and if try to add it at the end of file
         grep -qxF "$cfgline" "$cfgfile"
@@ -44,13 +55,11 @@ if [ "$key" = "c" ]; then
             echo "$cfgline" >> "$cfgfile"
         fi
         
+        # configuration update verification
         grep -qxF "$cfgline" "$cfgfile"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to update node sshd configuration to allow private-key clients"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: failed to update node sshd configuration to allow access by private-key" && exit 1
         
-        echo "trying to update node sshd configuration to deny login by password"
+        echo "# ${0} >> root@${nodealias} >> ssh config >> allow access by private-key >> disable access by password >> try"
         
         cfgvar='PasswordAuthentication'
         cfgline='PasswordAuthentication no'
@@ -58,10 +67,7 @@ if [ "$key" = "c" ]; then
         
         # search and try to update commented by # or PasswordAuthentication yes
         sed -i "s/.*${cfgvar}.*/${cfgline}/" "${cfgfile}"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to update node sshd configuration to deny login by password"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: failed to update node sshd configuration to disable access by password" && exit 1
         
         # search if "PasswordAuthentication no" is not missing and if try to add it at the end of file
         grep -qxF "$cfgline" "$cfgfile"
@@ -70,25 +76,19 @@ if [ "$key" = "c" ]; then
         fi
         
         grep -qxF "$cfgline" "$cfgfile"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to update node sshd configuration to deny login by password"
-            exit 1
-        fi
-        
-        echo "node sshd configuration has been updated to to allow private-key clients only"
+        (test $? != 0) && echo "ERROR: failed to update node sshd configuration to disable access by password" && exit 1
         
         /usr/sbin/service sshd restart
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to restart sshd with new configuration"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: failed to restart sshd with new configuration" && exit 1
+        
+        echo "# ${0} >> root@${nodealias} >> ssh config >> allow access by private-key >> disable access by password >> try >> success"
     fi
 fi
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 006.002 >> node >> root >> etc/hosts.allow/deny >> access only from client and tor >> optional"
+echo "# ${0} >> root@${nodealias} >> etc/hosts.allow/deny >> access only from client and tor >> optional"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -108,7 +108,7 @@ echo ""
 if [ "$key" = "c" ]; then
     if [ "$sshiponly" = "sshiponlyyes" ]; then
         
-        echo "trying to update node hosts.allow to allow ssh access from client and tor only"
+        echo "# ${0} >> root@${nodealias} >> trying to update node hosts.allow to allow ssh access from client and tor only >> try"
         
         cfgvar='sshd:'
         cfgval='127.0.0.1'
@@ -122,10 +122,7 @@ if [ "$key" = "c" ]; then
         fi
         
         cat "${cfgfile}" | grep "^${cfgvar}" | grep "${cfgval}"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>" && exit 1
         
         cfgvar='sshd:'
         cfgval=`echo $SSH_CONNECTION | cut -d ' ' -f1`
@@ -139,12 +136,9 @@ if [ "$key" = "c" ]; then
         fi
         
         cat "${cfgfile}" | grep "^${cfgvar}" | grep "${cfgval}"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>" && exit 1
         
-        echo "trying to update node hosts.deny to allow ssh access from client and tor only"
+        echo "# ${0} >> root@${nodealias} >> trying to update node hosts.deny to deny ssh access from any other source >> try"
         
         cfgvar='sshd:'
         cfgval='ALL'
@@ -158,19 +152,16 @@ if [ "$key" = "c" ]; then
         fi
         
         cat "${cfgfile}" | grep "^${cfgvar}" | grep "${cfgval}"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>" && exit 1
         
-        echo "node hosts.allow and hosts.deny to allow ssh access from client and tor only success"
+        echo "# ${0} >> root@${nodealias} >> etc/hosts.allow/deny >> access only from client and tor >> try >> success"
     fi
 fi
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 006.003 >> node >> root >> apt install software dependencies"
+echo "# ${0} >> root@${nodealias} >> apt install software dependencies"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <q> to exit setup process: " key
@@ -185,23 +176,28 @@ done
 echo ""
 
 if [ "$key" = "c" ]; then
-    # install system packages/software/utils needed, this can take same time...
+    echo "# ${0} >> root@${nodealias} >> apt install software dependencies >> try"
+    
+    
     if [ "${firejail}" = "firejailyes" ];then
-        firejailpkg="firejail"
-    fi
-    apt update && apt full-upgrade && apt install tor screen joe mc git gitg keepassx make cmake clang clang-tools clang-format libclang1 libboost-all-dev wget qt5-qmake-bin qt5-qmake qttools5-dev-tools qttools5-dev qtbase5-dev-tools qtbase5-dev libqt5charts5-dev basez openssl keepassx geany gcc g++ cargo apt-file net-tools xsensors hddtemp ${firejailpkg} 
-    if [ $? -ne 0 ]; then
-        echo "ERROR: install software dependencies by root@node error"
-        exit 1
+        deb_pkg_firejail="firejail"
     fi
     
-    echo "software dependencies has been successfully installed"
+    if [ ${sshtoraccess} = "sshtoraccessyes" ] || [ ${torwallet} = "torwalletyes" ] || [ ${torhswallet} = "torhswalletyes" ]; then
+        deb_pkg_tor="tor"
+    fi
+    
+    # install system packages/software/utils needed, this can take same time...
+    apt update && apt full-upgrade && apt install screen htop joe mc curl git gitg keepassxc make cmake clang clang-tools clang-format libclang1 libboost-all-dev wget qt5-qmake-bin qt5-qmake qttools5-dev-tools qttools5-dev qtbase5-dev-tools qtbase5-dev libqt5charts5-dev basez libprotobuf-dev protobuf-compiler libssl-dev openssl keepassx geany gcc g++ cargo apt-file net-tools xsensors hddtemp ${deb_pkg_firejail} ${deb_pkg_tor}
+    (test $? != 0) && echo "ERROR: install software dependencies by root@node error" && exit 1
+    
+    echo "# ${0} >> root@${nodealias} >> apt install software dependencies >> try >> success"
 fi
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 006.004 >> node >> root >> tor >> update user groups for tor usage ability"
+echo "# ${0} >> root@${nodealias} >> tor >> update user ${nodeuser2} groups to allow tor access"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <q> to exit setup process: " key
@@ -219,17 +215,15 @@ if [ "$key" = "c" ]; then
     
     if [ ${sshtoraccess} = "sshtoraccessyes" ] || [ ${torwallet} = "torwalletyes" ] || [ ${torhswallet} = "torhswalletyes" ]; then
         
-        echo "trying to update ${nodeuser2} for tor usage ability"
+        echo "# ${0} >> root@${nodealias} >> tor >> update user ${nodeuser2} groups to allow tor access >> try"
         
         groups ${nodeuser2} | grep "debian-tor"
         if [ $? -ne 0 ]; then
             /usr/sbin/usermod -a -G debian-tor ${nodeuser2}
-            if [ $? -ne 0 ]; then
-                echo "ERROR: failed to add user <${nodeuser2}> to group <debian-tor>"
-                exit 1
-            fi
+            (test $? != 0) && echo "ERROR: failed to add user <${nodeuser2}> to group <debian-tor>" && exit 1
         fi
-        echo "update ${nodeuser2} for tor usage ability success"
+        
+        echo "# ${0} >> root@${nodealias} >> tor >> update user ${nodeuser2} groups to allow tor access >> try >> success"
         
     fi
 fi
@@ -237,7 +231,7 @@ fi
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 006.005 >> node >> root >> tor config >> create hidden service v3 for ssh clients authorized by key"
+echo "# ${0} >> root@${nodealias} >> tor config >> create hidden service v3 for ssh clients authorized by key"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -257,7 +251,7 @@ echo ""
 if [ "$key" = "c" ]; then
     if [ "$sshtoraccess" = "sshtoraccessyes" ]; then
         
-        echo "trying to update node tor configuration to allow ssh by tor"
+        echo "# ${0} >> root@${nodealias} >> tor config >> create hidden service v3 for ssh clients authorized by key >> try"
         
         cfgvar='ControlPort'
         cfgval='9051'
@@ -270,10 +264,7 @@ if [ "$key" = "c" ]; then
         fi
         
         cat "${cfgfile}" | grep "^${cfgvar}" | grep "${cfgval}"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>" && exit 1
         
         cfgvar='CookieAuthentication'
         cfgval='1'
@@ -285,10 +276,7 @@ if [ "$key" = "c" ]; then
         fi
         
         cat "${cfgfile}" | grep "^${cfgvar}" | grep "${cfgval}"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>" && exit 1
 
         cfgvar='CookieAuthFileGroupReadable'
         cfgval='1'
@@ -300,10 +288,7 @@ if [ "$key" = "c" ]; then
         fi
         
         cat "${cfgfile}" | grep "^${cfgvar}" | grep "${cfgval}"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>" && exit 1
         
         cfgvar='CookieAuthFile'
         cfgval='/run/tor/control.authcookie'
@@ -315,10 +300,7 @@ if [ "$key" = "c" ]; then
         fi
         
         cat "${cfgfile}" | grep "^${cfgvar}" | grep "${cfgval}"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>" && exit 1
         
         cfgvar='HiddenServiceDir'
         cfgval='/var/lib/tor/hidden-service-ssh/'
@@ -336,10 +318,7 @@ ${cfgline3}
         fi
         
         cat "${cfgfile}" | grep "^${cfgvar}" | grep "${cfgval}"
-        if [ $? -ne 0 ]; then
-            echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: failed to update <${cfgfile}> to contain <${cfgline}>" && exit 1
         
         # need to restart tor service to let hidden service generate onion addresses
         /usr/sbin/service tor restart
@@ -350,10 +329,7 @@ ${cfgline3}
         torauthclientsdir="/var/lib/tor/hidden-service-ssh/authorized_clients/"
         
         mkdir -p ${torauthclientsdir} && cd "${torauthclientsdir}" && chown debian-tor:debian-tor . && chmod 700 .
-        if [ $? -ne 0 ]; then
-            echo "ERROR: directory <${torauthclientsdir}> processing failed"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: directory <${torauthclientsdir}> processing failed" && exit 1
         
         #generate key name
         keyname="${clientalias}2${nodealias}"
@@ -362,71 +338,47 @@ ${cfgline3}
         torgenkeysdir="/root/private_ssl_keys"
         
         mkdir -p ${torgenkeysdir} && cd ${torgenkeysdir} && chmod 700 .
-        if [ $? -ne 0 ]; then
-            echo "ERROR: directory <${torgenkeysdir}> processing failed"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: directory <${torgenkeysdir}> processing failed" && exit 1
         
         # generate private key for hidden service ssh client X
         openssl genpkey -algorithm x25519 -out ./${keyname}.prv.pem
-        if [ $? -ne 0 ]; then
-            echo "ERROR: <${keyname}>.prv.pem failed to generate"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: <${keyname}>.prv.pem failed to generate" && exit 1
         
         # export private key as base 32 key
         cat ./${keyname}.prv.pem | grep -v " PRIVATE KEY" | base64pem -d | tail --bytes=32 | base32 | sed 's/=//g' > ./${keyname}.prv.key
-        if [ $? -ne 0 ]; then
-            echo "ERROR: <${keyname}>.prv.key failed to export"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: <${keyname}>.prv.key failed to export" && exit 1
         
         # export public key as base 32 key
         openssl pkey -in ./${keyname}.prv.pem -pubout | grep -v " PUBLIC KEY" | base64pem -d | tail --bytes=32 | base32 | sed 's/=//g' > ./${keyname}.pub.key
-        if [ $? -ne 0 ]; then
-            echo "ERROR: <${keyname}>.pub.key failed to export"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: <${keyname}>.pub.key failed to export" && exit 1
         
         # export private key formated as: <56-char-onion-addr-without-.onion-part>:descriptor:x25519:<x25519 private key in base32>
         echo "`cat /var/lib/tor/hidden-service-ssh/hostname | cut -d '.' -f1`:descriptor:x25519:`cat ./${keyname}.prv.key`" > ./${keyname}.auth_private
-        if [ $? -ne 0 ]; then
-            echo "ERROR: <${keyname}>.auth_private failed to export"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: <${keyname}>.auth_private failed to export" && exit 1
         
         # export public key formated as: <auth-type>:<key-type>:<base32-encoded-public-key>
         echo "descriptor:x25519:`cat ./${keyname}.pub.key`" > ./${keyname}.auth
-        if [ $? -ne 0 ]; then
-            echo "ERROR: <${keyname}.auth> failed to export"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: <${keyname}>.auth failed to export" && exit 1
         
         # copy formated private key to nodeuser2 installtion directory
         cp ./${keyname}.auth_private ${dxbot_dir_remote_setup} && chmod 700 ${dxbot_dir_remote_setup}"/"${keyname}.auth_private && chown $nodeuser2 ${dxbot_dir_remote_setup}"/"${keyname}.auth_private
-        if [ $? -ne 0 ]; then
-            echo "ERROR: <${dxbot_dir_remote_setup}/${keyname}.auth_private> copy failed"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: <${dxbot_dir_remote_setup}/${keyname}.auth_private> copy failed" && exit 1
         
         # copy formated public key to tor auth directory
         cp ./${keyname}.auth ${torauthclientsdir} && chmod 700 ${torauthclientsdir}${keyname}.auth && chown debian-tor:debian-tor ${torauthclientsdir}${keyname}.auth
-        if [ $? -ne 0 ]; then
-            echo "ERROR: <${torauthclientsdir}${keyname}.auth> copy failed"
-            exit 1
-        fi
+        (test $? != 0) && echo "ERROR: <${torauthclientsdir}${keyname}.auth> copy failed" && exit 1
 
         # restart tor service
         /usr/sbin/service tor restart
         
-        echo "node >> root >> tor config >> create hidden service v3 for ssh clients authorized by key success"
+        echo "# ${0} >> root@${nodealias} >> tor config >> create hidden service v3 for ssh clients authorized by key >> try >> success"
     fi
 fi
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 006.006 >> node >> root >> remote desktop access config >> spice protocol access configuration"
+echo "# ${0} >> root@${nodealias} >> remote desktop access configuration"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -445,19 +397,19 @@ echo ""
 
 if [ "$key" = "c" ]; then
     if [ "$rd" = "rdyes" ]; then
+        echo "# ${0} >> root@${nodealias} >> remote desktop access configuration >> try"
         
-        echo "node >> root >> remote desktop access >> update >> try"
+        #~ TODO add remote desktop configuration process
+        (test $? != 0) && echo "ERROR: remote desktop node configuration failed" && exit 1
         
-        #~ TODO THIS
-        
-        echo "node >> root >> remote desktop access >> update >> try >> success"
+        echo "# ${0} >> root@${nodealias} >> remote desktop access configuration >> try >> success"
     fi
 fi
 
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# STEP 006.006 >> node >> root >> firejail main config update"
+echo "# ${0} >> root@${nodealias} >> firejail main config update"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -476,16 +428,19 @@ echo ""
 
 if [ "$key" = "c" ]; then
     if [ "${firejail}" = "firejailyes" ];then
-    
+        echo "# ${0} >> root@${nodealias} >> firejail main config update >> try"
+        
+        echo "# ${0} >> root@${nodealias} >> firejail main config update >> allow network restrictions"
         firejail_main_cfg="/etc/firejail/firejail.config"
         sed -i \
             -e "s/.*restricted-network.*/restricted-network no/g" \
             ${firejail_main_cfg}
-        (test $? = 0) || (echo "firejail config file <${firejail_main_cfg}> update failed" && exit 1)
+        (test $? != 0) && echo "firejail config file <${firejail_main_cfg}> update failed" && exit 1
         
         cat ${firejail_main_cfg} | grep -e "restricted-network no"
-        (test $? = 0) || (echo "firejail config file <${firejail_main_cfg}> check failed" && exit 1)
+        (test $? != 0) && echo "firejail config file <${firejail_main_cfg}> check failed" && exit 1
         
+        echo "# ${0} >> root@${nodealias} >> firejail main config update >> try >> success"
     fi
 fi
 
