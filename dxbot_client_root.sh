@@ -39,11 +39,13 @@ echo ""
 if [ "$key" = "c" ]; then
     if [ "$sshtoraccess" = "sshtoraccessyes" ]; then
         
+        # install tor package
         echo "# ${0} >> root@${clientalias} >> tor install >> try"
         
         apt install tor
         (test $? != 0) && echo "ERROR: install tor package on root@${clientalias} failed" && exit 1
         
+        # update tor config about directory used to store client auth private keys for hs
         echo "# ${0} >> root@${clientalias} >> tor configuration update >> try"
         
         cfgvar='ClientOnionAuthDir'
@@ -76,10 +78,16 @@ if [ "$key" = "c" ]; then
         mkdir -p ${torgenkeysdir} && cd ${torgenkeysdir} && chmod 700 .
         (test $? != 0) && echo "ERROR: directory <${torgenkeysdir}> processing failed" && exit 1
         
-        # copy formated private key to nodeuser2 installtion directory
-        cp ${dxbot_dir_local_setup}${keyname}.auth_private ${torauthclientsdir} && chmod 700 ${torauthclientsdir}${keyname}.auth_private && chown $nodeuser2 ${torauthclientsdir}${keyname}.auth_private && mv ${dxbot_dir_local_setup}${keyname}.auth_private ${torgenkeysdir}${keyname}.auth_private && chmod 700 ${torgenkeysdir}${keyname}.auth_private && chown root ${torgenkeysdir}${keyname}.auth_private
+        # copy formated private key to nodeuser2 installation directory
+        cp ${dxbot_dir_local_setup}${keyname}.auth_private ${torauthclientsdir} && \
+        chmod 700 ${torauthclientsdir}${keyname}.auth_private && \
+        chown $nodeuser2 ${torauthclientsdir}${keyname}.auth_private && \
+        mv ${dxbot_dir_local_setup}${keyname}.auth_private ${torgenkeysdir}${keyname}.auth_private && \
+        chmod 700 ${torgenkeysdir}${keyname}.auth_private && \
+        chown root ${torgenkeysdir}${keyname}.auth_private
         (test $? != 0) && echo "ERROR: <${torauthclientsdir}${keyname}.auth_private> copy failed" && exit 1
         
+        # generate shell script to connect by ssh by tor to node
         echo "ssh ${nodeuser2}@`cat ${torgenkeysdir}${keyname}.auth_private | cut -d ':' -f1`.onion" > ${dxbot_dir_local_setup}${keyname}.sh && chown ${nodeuser2} ${dxbot_dir_local_setup}${keyname}.sh
         (test $? != 0) && echo "ERROR: <${dxbot_dir_local_setup}${keyname}.sh> file generate failed" && exit 1
         
@@ -88,7 +96,7 @@ if [ "$key" = "c" ]; then
         
         echo "# ${0} >> root@${clientalias} >> tor update about new user ${localuser}"
         
-        # if localuser is not in tor group, try to add it
+        # if localuser is not in tor group, is not allowed to use tor, so try to add user to tor group
         groups ${localuser} | grep "debian-tor"
         if [ $? -ne 0 ]; then
             /usr/sbin/usermod -a -G debian-tor ${localuser}

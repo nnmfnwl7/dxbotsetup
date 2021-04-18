@@ -178,17 +178,20 @@ echo ""
 if [ "$key" = "c" ]; then
     echo "# ${0} >> root@${nodealias} >> apt install software dependencies >> try"
     
-    
+    # optional sandboxing build processes and running wallets by firejail
     if [ "${firejail}" = "firejailyes" ];then
         deb_pkg_firejail="firejail"
     fi
     
+    # optional tor package
     if [ ${sshtoraccess} = "sshtoraccessyes" ] || [ ${torwallet} = "torwalletyes" ] || [ ${torhswallet} = "torhswalletyes" ]; then
         deb_pkg_tor="tor"
     fi
     
     # install system packages/software/utils needed, this can take same time...
-    apt update && apt full-upgrade && apt install screen htop joe mc curl git gitg keepassxc make cmake clang clang-tools clang-format libclang1 libboost-all-dev wget qt5-qmake-bin qt5-qmake qttools5-dev-tools qttools5-dev qtbase5-dev-tools qtbase5-dev libqt5charts5-dev basez libprotobuf-dev protobuf-compiler libssl-dev openssl keepassx geany gcc g++ cargo apt-file net-tools xsensors hddtemp ${deb_pkg_firejail} ${deb_pkg_tor}
+    # apt update most of time returns error so ignoring return value of this command
+    apt update
+    apt full-upgrade && apt install screen htop joe mc curl git gitg keepassxc make cmake clang clang-tools clang-format libclang1 libboost-all-dev wget qt5-qmake-bin qt5-qmake qttools5-dev-tools qttools5-dev qtbase5-dev-tools qtbase5-dev libqt5charts5-dev basez libprotobuf-dev protobuf-compiler libssl-dev openssl keepassx geany gcc g++ cargo apt-file net-tools xsensors hddtemp ${deb_pkg_firejail} ${deb_pkg_tor}
     (test $? != 0) && echo "ERROR: install software dependencies by root@node error" && exit 1
     
     echo "# ${0} >> root@${nodealias} >> apt install software dependencies >> try >> success"
@@ -217,6 +220,7 @@ if [ "$key" = "c" ]; then
         
         echo "# ${0} >> root@${nodealias} >> tor >> update user ${nodeuser2} groups to allow tor access >> try"
         
+        # if nodeuser is not in tor group, is not allowed to use tor, so try to add user to tor group
         groups ${nodeuser2} | grep "debian-tor"
         if [ $? -ne 0 ]; then
             /usr/sbin/usermod -a -G debian-tor ${nodeuser2}
@@ -322,27 +326,32 @@ ${cfgline3}
         
         # need to restart tor service to let hidden service generate onion addresses
         /usr/sbin/service tor restart
-        echo "waiting for tor service restart"
+        echo "waiting 7 seconds for tor service fully restart"
         sleep 7
         
-        # check tor directory used for storing auth private keys for clients
+        # prepare tor directory used for storing auth private keys for clients
         torauthclientsdir="/var/lib/tor/hidden-service-ssh/authorized_clients/"
         
         mkdir -p ${torauthclientsdir} && cd "${torauthclientsdir}" && chown debian-tor:debian-tor . && chmod 700 .
         (test $? != 0) && echo "ERROR: directory <${torauthclientsdir}> processing failed" && exit 1
         
-        #generate key name
+        # generate key name
         keyname="${clientalias}2${nodealias}"
 
-        # preparere directory for storing keys
+        # prepare root directory for storing tor keys
         torgenkeysdir="/root/private_ssl_keys"
         
         mkdir -p ${torgenkeysdir} && cd ${torgenkeysdir} && chmod 700 .
         (test $? != 0) && echo "ERROR: directory <${torgenkeysdir}> processing failed" && exit 1
         
-        # generate private key for hidden service ssh client X
-        openssl genpkey -algorithm x25519 -out ./${keyname}.prv.pem
-        (test $? != 0) && echo "ERROR: <${keyname}>.prv.pem failed to generate" && exit 1
+        # check if private pem is not already generated so skip
+        if [ -f "./${keyname}.prv.pem" ]; then
+            echo "openssl gen private key skip because already exist <./${keyname}.prv.pem>"
+        else
+            # generate private key for hidden service ssh client X
+            openssl genpkey -algorithm x25519 -out ./${keyname}.prv.pem
+            (test $? != 0) && echo "ERROR: <${keyname}>.prv.pem failed to generate" && exit 1
+        fi
         
         # export private key as base 32 key
         cat ./${keyname}.prv.pem | grep -v " PRIVATE KEY" | base64pem -d | tail --bytes=32 | base32 | sed 's/=//g' > ./${keyname}.prv.key
@@ -360,12 +369,16 @@ ${cfgline3}
         echo "descriptor:x25519:`cat ./${keyname}.pub.key`" > ./${keyname}.auth
         (test $? != 0) && echo "ERROR: <${keyname}>.auth failed to export" && exit 1
         
-        # copy formated private key to nodeuser2 installtion directory
-        cp ./${keyname}.auth_private ${dxbot_dir_remote_setup} && chmod 700 ${dxbot_dir_remote_setup}"/"${keyname}.auth_private && chown $nodeuser2 ${dxbot_dir_remote_setup}"/"${keyname}.auth_private
+        # copy formated private key to nodeuser2 installation directory
+        cp ./${keyname}.auth_private ${dxbot_dir_remote_setup} && \
+        chmod 700 ${dxbot_dir_remote_setup}"/"${keyname}.auth_private && \
+        chown $nodeuser2 ${dxbot_dir_remote_setup}"/"${keyname}.auth_private
         (test $? != 0) && echo "ERROR: <${dxbot_dir_remote_setup}/${keyname}.auth_private> copy failed" && exit 1
         
         # copy formated public key to tor auth directory
-        cp ./${keyname}.auth ${torauthclientsdir} && chmod 700 ${torauthclientsdir}${keyname}.auth && chown debian-tor:debian-tor ${torauthclientsdir}${keyname}.auth
+        cp ./${keyname}.auth ${torauthclientsdir} && \
+        chmod 700 ${torauthclientsdir}${keyname}.auth && \
+        chown debian-tor:debian-tor ${torauthclientsdir}${keyname}.auth
         (test $? != 0) && echo "ERROR: <${torauthclientsdir}${keyname}.auth> copy failed" && exit 1
 
         # restart tor service
@@ -431,7 +444,9 @@ if [ "$key" = "c" ]; then
         echo "# ${0} >> root@${nodealias} >> firejail main config update >> try"
         
         echo "# ${0} >> root@${nodealias} >> firejail main config update >> allow network restrictions"
+        
         firejail_main_cfg="/etc/firejail/firejail.config"
+        
         sed -i \
             -e "s/.*restricted-network.*/restricted-network no/g" \
             ${firejail_main_cfg}

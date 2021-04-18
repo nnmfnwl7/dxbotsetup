@@ -89,6 +89,10 @@ BLOCKwallet='gui'
 #~ BLOCKwallet='BLOCKd'
 #~ BLOCKwalletrestore="${HOME}/.blocknet/wallet.dat"
 
+# separated blocknet instance for staking on ~/.blocknet.staking directory
+BLOCKwalletstaking='no'
+#~ BLOCKwalletstaking='gui'
+
 # bitcoin walet
 BTCwallet='gui' # wallet with qt interface and also as daemon
 #~ BTCwallet='daemon' # compile wallet as daemon only
@@ -131,5 +135,5 @@ PIVXwallet='gui'
 #~ XMRwallet='no'
 #~ XMRwalletrestore="${HOME}/Monero/wallets/${USER}/*
 
-# root of installation directory where source code and binary files are stored
+# installation node root-directory where source code and binary files are stored
 dxbot_dir_remote_root="/home/${nodeuser2}/ccwallets"

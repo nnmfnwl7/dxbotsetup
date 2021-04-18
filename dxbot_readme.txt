@@ -45,11 +45,28 @@ git checkout github $HOME/dxbotsetup
 cp dxbot_cfg_example1.sh dxbot_cfg_node1.sh
 joe dxbot_cfg_node1.sh
 
-# run dxbot autosetup by command:
+# run dxbot autosetup by command and follow instructions:
 bash ./dxbot_setup.sh dxbot_cfg_node1.sh
 
 ########################################################################
 # step 5
+
+# dxbot setup will or optionally will
+
+# connect from client to node. Client and node can possibly be also localhost
+# install software dependencies, tor, firejail
+# configure ssh, tor, firejail
+# clone packages source code with git
+# generate firejail sanbox profile files
+# make wallet daemon cli and QT binaries from source code optionally in firejail sandbox
+# generate wallet configuration files
+# restore wallet.dat files
+# generate scripts to run wallets/qt/daemon in screen/terminal with/without firejail
+# clone dxbot with git
+# auto-configure dxbot with restored wallets
+
+########################################################################
+# step 6
 
 # find out generated helper scripts used to connect to node or run blockdx ecosystem
 # this scripts are named <client alias><node alias>.*

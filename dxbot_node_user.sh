@@ -39,41 +39,14 @@ echo ""
 if [ "$key" = "c" ]; then
     echo "# ${0} >> ${nodeuser2}@${nodealias} >> checkout and build wallets from source code >> try"
     
-    if [ ${BLOCKwallet} = "gui" ] || [ ${BLOCKwallet} = "daemon" ]; then
-        bash ./dxbot_node_user_cc.sh ${dxbot_config_file_arg} dxbot_node_user_block.sh
-        (test $? != 0) && echo "ERROR: Blocknet wallet checkout and build failed" && exit 1
-    fi
-
-    #~ TODO also apply left wallets configuration files and uncomment code
+    cd ${dxbot_dir_remote_setup}
+    (test $? != 0) && echo "ERROR: change directory <$dxbot_dir_remote_setup> failed" && exit 1
     
-    #~ if [ ${BTCwallet} = "gui" ] || [ ${BTCwallet} = "daemon" ]; then
-        #~ bash ./dxbot_node_user_btc.sh || (echo "ERROR: Bitcoin wallet checkout and install failed" && exit 1)
-    #~ fi
-
-    if [ ${LTCwallet} = "gui" ] || [ ${LTCwallet} = "daemon" ]; then
-        bash ./dxbot_node_user_cc.sh ${dxbot_config_file_arg} dxbot_node_user_ltc.sh
-        (test $? != 0) && echo "ERROR: Litecoin wallet checkout and build failed" && exit 1
-    fi
-
-    #~ if [ ${DASHwallet} = "gui" ] || [ ${DASHwallet} = "daemon" ]; then
-        #~ bash ./dxbot_node_user_dash.sh || (echo "ERROR: Dashpay wallet checkout and install failed" && exit 1)
-    #~ fi
-
-    #~ if [ ${DOGEwallet} = "gui" ] || [ ${DOGEwallet} = "daemon" ]; then
-        #~ bash ./dxbot_node_user_doge.sh || (echo "ERROR: Dogecoin wallet checkout and install failed" && exit 1)
-    #~ fi
-
-    #~ if [ ${XVGwallet} = "gui" ] || [ ${XVGwallet} = "daemon" ]; then
-        #~ bash ./dxbot_node_user_xvg.sh || (echo "ERROR: Verge wallet checkout and install failed" && exit 1)
-    #~ fi
-
-    #~ if [ ${PIVXwallet} = "gui" ] || [ ${PIVXwallet} = "daemon" ]; then
-        #~ bash ./dxbot_node_user_pivx.sh || (echo "ERROR: Pivx wallet checkout and install failed" && exit 1)
-    #~ fi
-
-    #~ if [ ${XMRwallet} = "gui" ] || [ ${XMRwallet} = "daemon" ]; then
-        #~ bash ./dxbot_node_user_xmr.sh || (echo "ERROR: Monero wallet checkout and install failed" && exit 1)
-    #~ fi
+    cc_list=`ls | grep dxbot_node_user_cc_cfg_ | grep sh$`
+    for f in $cc_list; do
+        bash ./dxbot_node_user_cc.sh ${dxbot_config_file_arg} $f
+        (test $? != 0) && echo "ERROR: <$f> wallet configuration file processing failed" && exit 1
+    done
     
     echo "# ${0} >> ${nodeuser2}@${nodealias} >> checkout and build wallets from source code >> try >> success"
 fi
@@ -108,6 +81,13 @@ if [ "$key" = "c" ]; then
     echo "# ${0} >> ${nodeuser2}@${nodealias} >> checkout and configure dxbot >> try >> success"
 fi
 
-#~ TODO cron user startup by screen or mate-terminal
+#~ TODO update cron user startup by screen or mate-terminal
+
+#~ TODO generate mate/gnome terminal script for QT and D
+
+#~ TODO generate screen script
+# screen -t <title> <tab-index> <command>
+# screen -t titlescript1 0 bash script1.sh
+# screen -t titlescript2 1 bash script2.sh
 
 exit 0

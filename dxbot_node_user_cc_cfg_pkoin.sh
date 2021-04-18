@@ -1,6 +1,6 @@
 cc_ticker="PKOIN"
-cc_name="pocketcoin"
-cc_name_upper="Pocketcoin"
+cc_name_full="pocketcoin"
+cc_name_prefix="pocketcoin"
 cc_blockchain_dir=${HOME}"/.pocketcoin"
 cc_cfg="pocketcoin.conf"
 
@@ -29,10 +29,21 @@ cc_nodes_clearnet='
 cc_nodes_tor='
 '
 
-cc_firejail_profile_d=${cc_name}"d.profile"
-cc_firejail_profile_qt=${cc_name}"-qt.profile"
-cc_firejail_profile_cli=${cc_name}"-cli.profile"
-cc_firejail_profile_make=${cc_name}"make.profile"
+cc_firejail_blockchain_dir_path='${HOME}/.pocketcoin'
+cc_firejail_cfg_file_path=${cc_firejail_blockchain_dir_path}"/"${cc_cfg}
+
+cc_firejail_qt_cfg_dir_path='${HOME}/.config/Pocketcoin'
+
+cc_firejail_src_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_src/"
+
+cc_firejail_daemon_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"d"
+cc_firejail_cli_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"-cli"
+cc_firejail_qt_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"-qt"
+
+cc_firejail_profile_d=${cc_name_prefix}"d.profile"
+cc_firejail_profile_qt=${cc_name_prefix}"-qt.profile"
+cc_firejail_profile_cli=${cc_name_prefix}"-cli.profile"
+cc_firejail_profile_make=${cc_name_prefix}"make.profile"
 
 cc_export_CC=""
 cc_export_CXX=""

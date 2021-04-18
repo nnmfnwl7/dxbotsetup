@@ -1,6 +1,6 @@
 cc_ticker="BLOCK"
-cc_name="blocknet"
-cc_name_upper="Blocknet"
+cc_name_full="blocknet"
+cc_name_prefix="blocknet"
 cc_blockchain_dir=${HOME}"/.blocknet"
 cc_cfg="blocknet.conf"
 
@@ -31,21 +31,31 @@ wbbesmd4e5ryvxxb.onion:41412
 cmi452uosfx5zrbu.onion:41412
 y6ga2ty3vqedgs6f.onion:41412
 ukouz7bipuady23p.onion:41412
-ukouz7bipuady23p.onion:41412
 3sy7at64ykn7jxeb.onion:41412
 fnfzzmvzqngjia3p.onion:41412
 '
 
-cc_firejail_profile_d=${cc_name}"d.profile"
-cc_firejail_profile_qt=${cc_name}"-qt.profile"
-cc_firejail_profile_cli=${cc_name}"-cli.profile"
-cc_firejail_profile_make=${cc_name}"make.profile"
+cc_firejail_blockchain_dir_path='${HOME}/.blocknet'
+cc_firejail_cfg_file_path=${cc_firejail_blockchain_dir_path}"/"${cc_cfg}
+
+cc_firejail_qt_cfg_dir_path='${HOME}/.config/Blocknet'
+
+cc_firejail_src_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_src/"
+
+cc_firejail_daemon_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"d"
+cc_firejail_cli_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"-cli"
+cc_firejail_qt_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"-qt"
+
+cc_firejail_profile_d=${cc_name_prefix}".d.profile"
+cc_firejail_profile_qt=${cc_name_prefix}".qt.profile"
+cc_firejail_profile_cli=${cc_name_prefix}".cli.profile"
+cc_firejail_profile_make=${cc_name_prefix}".make.profile"
 
 cc_export_CC="clang"
 cc_export_CXX="clang++"
 
 cc_git_src="https://github.com/blocknetdx/blocknet.git"
-cc_git_branch="origin/4.3.2"
+cc_git_branch="origin/4.3.1"
 
 cc_wallet_type=${BLOCKwallet}
 

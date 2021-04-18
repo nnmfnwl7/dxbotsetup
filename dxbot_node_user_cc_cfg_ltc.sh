@@ -1,6 +1,6 @@
 cc_ticker="LTC"
-cc_name="litecoin"
-cc_name_upper="Litecoin"
+cc_name_full="litecoin"
+cc_name_prefix="litecoin"
 cc_blockchain_dir=${HOME}"/.litecoin"
 cc_cfg="litecoin.conf"
 
@@ -32,9 +32,20 @@ ajnrrpyx4cfkbjhg.onion:9333
 ltcfxb7x362h54x6.onion:9333
 '
 
-cc_firejail_profile_d=${cc_name}"d.profile"
-cc_firejail_profile_qt=${cc_name}"-qt.profile"
-cc_firejail_profile_make=${cc_name}"make.profile"
+cc_firejail_blockchain_dir_path='${HOME}/.litecoin'
+cc_firejail_cfg_file_path=${cc_firejail_blockchain_dir_path}"/"${cc_cfg}
+
+cc_firejail_qt_cfg_dir_path='${HOME}/.config/Litecoin'
+
+cc_firejail_src_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_src/"
+
+cc_firejail_daemon_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"d"
+cc_firejail_cli_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"-cli"
+cc_firejail_qt_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"-qt"
+
+cc_firejail_profile_d=${cc_name_prefix}"d.profile"
+cc_firejail_profile_qt=${cc_name_prefix}"-qt.profile"
+cc_firejail_profile_make=${cc_name_prefix}"make.profile"
 
 cc_export_CC=""
 cc_export_CXX=""

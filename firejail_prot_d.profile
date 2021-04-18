@@ -11,18 +11,13 @@ ignore noexec ${PATH}/bash
 noblacklist ${PATH}/bash
 
 ### home directory mkdir/ mkfile / whitelisting / noblacklisting / read-only
-mkdir ${HOME}/.bitcoin
-mkdir ${HOME}/.config/Bitcoin
+mkdir cc_firejail_blockchain_dir_path
+whitelist cc_firejail_blockchain_dir_path
+noblacklist cc_firejail_blockchain_dir_path
 
-whitelist ${HOME}/.bitcoin
-noblacklist ${HOME}/.bitcoin
-
-whitelist ${HOME}/.config/Bitcoin
-noblacklist ${HOME}/.config/Bitcoin
-
-whitelist ${HOME}/cc_bin_path
-read-only ${HOME}/cc_bin_path
-noblacklist ${HOME}/cc_bin_path
+whitelist cc_firejail_daemon_file_path
+read-only cc_firejail_daemon_file_path
+noblacklist cc_firejail_daemon_file_path
 
 ### basic blacklisting
 include disable-common.inc
