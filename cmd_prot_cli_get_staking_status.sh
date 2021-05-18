@@ -1,2 +1,2 @@
 # get staking status
-cd cli_dir && ./cli_bin -datadir=$HOME/.blockchain_dir/ getstakingstatus
+cc_cli_file_path_eval -datadir=cc_blockchain_dir_path_eval getstakingstatus

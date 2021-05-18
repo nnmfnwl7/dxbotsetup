@@ -19,7 +19,7 @@ source "${dxbot_config_file_arg}"
 ########################################################################
 echo ""
 echo "##################################################################"
-echo "# ${0} >> ${nodeuser2}@${nodealias} >> checkout and build wallets from source code"
+echo "# ${0} >> ${nodeuser2}@${nodealias} >> build wallets from source >> generate wallets config >> generate sandbox config"
 while true; do
     echo ""
     read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
@@ -37,7 +37,7 @@ done
 echo ""
 
 if [ "$key" = "c" ]; then
-    echo "# ${0} >> ${nodeuser2}@${nodealias} >> checkout and build wallets from source code >> try"
+    echo "# ${0} >> ${nodeuser2}@${nodealias} >> build wallets from source >> generate wallets config >> generate sandbox config >> try"
     
     cd ${dxbot_dir_remote_setup}
     (test $? != 0) && echo "ERROR: change directory <$dxbot_dir_remote_setup> failed" && exit 1
@@ -48,7 +48,7 @@ if [ "$key" = "c" ]; then
         (test $? != 0) && echo "ERROR: <$f> wallet configuration file processing failed" && exit 1
     done
     
-    echo "# ${0} >> ${nodeuser2}@${nodealias} >> checkout and build wallets from source code >> try >> success"
+    echo "# ${0} >> ${nodeuser2}@${nodealias} >> build wallets from source >> generate wallets config >> generate sandbox config >> try >> success"
 fi
 
 

@@ -11,17 +11,17 @@ ignore noexec ${PATH}/bash
 noblacklist ${PATH}/bash
 
 ### home directory mkdir/ mkfile / whitelisting / noblacklisting / read-only
-mkdir cc_firejail_blockchain_dir_path
-whitelist cc_firejail_blockchain_dir_path
-noblacklist cc_firejail_blockchain_dir_path
+mkdir cc_blockchain_dir_path_noteval
+whitelist cc_blockchain_dir_path_noteval
+noblacklist cc_blockchain_dir_path_noteval
 
-mkdir cc_firejail_qt_cfg_dir_path
-whitelist cc_firejail_qt_cfg_dir_path
-noblacklist cc_firejail_qt_cfg_dir_path
+mkdir cc_qt_cfg_dir_path_noteval
+whitelist cc_qt_cfg_dir_path_noteval
+noblacklist cc_qt_cfg_dir_path_noteval
 
-whitelist cc_firejail_qt_file_path
-read-only cc_firejail_qt_file_path
-noblacklist cc_firejail_qt_file_path
+whitelist cc_qt_file_path_eval
+read-only cc_qt_file_path_eval
+noblacklist cc_qt_file_path_eval
 
 ### basic blacklisting
 include disable-common.inc

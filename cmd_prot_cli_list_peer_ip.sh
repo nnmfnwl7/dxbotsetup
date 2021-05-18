@@ -1,5 +1,5 @@
 # get staking status
-cons=`cd cli_dir && ./cli_bin -datadir=$HOME/.blockchain_dir/ getconnectioncount`
+cons=`cc_cli_file_path_eval -datadir=cc_blockchain_dir_path_eval getconnectioncount`
 echo "wallet is connected to $cons peers"
 echo "peer list:"
-cd cli_dir && ./cli_bin -datadir=$HOME/.blockchain_dir/ getpeerinfo | grep "\"addr\":" | grep "\."
+cc_cli_file_path_eval -datadir=cc_blockchain_dir_path_eval getpeerinfo | grep "\"addr\":" | grep "\."

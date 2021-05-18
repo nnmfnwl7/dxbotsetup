@@ -1,2 +1,2 @@
 # stop daemon or qt wallet
-cd cli_dir && ./cli_bin -datadir=$HOME/.blockchain_dir/ stop
+cc_cli_file_path_eval -datadir=cc_blockchain_dir_path_eval stop

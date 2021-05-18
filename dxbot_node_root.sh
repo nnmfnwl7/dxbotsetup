@@ -191,7 +191,7 @@ if [ "$key" = "c" ]; then
     # install system packages/software/utils needed, this can take same time...
     # apt update most of time returns error so ignoring return value of this command
     apt update
-    apt full-upgrade && apt install screen htop joe mc curl git gitg keepassxc make cmake clang clang-tools clang-format libclang1 libboost-all-dev wget qt5-qmake-bin qt5-qmake qttools5-dev-tools qttools5-dev qtbase5-dev-tools qtbase5-dev libqt5charts5-dev basez libprotobuf-dev protobuf-compiler libssl-dev openssl keepassx geany gcc g++ cargo apt-file net-tools xsensors hddtemp ${deb_pkg_firejail} ${deb_pkg_tor}
+    apt full-upgrade && apt install screen htop joe mc curl git gitg keepassxc make cmake clang clang-tools clang-format libclang1 libboost-all-dev wget qt5-qmake-bin qt5-qmake qttools5-dev-tools qttools5-dev qtbase5-dev-tools qtbase5-dev libqt5charts5-dev basez libprotobuf-dev protobuf-compiler libssl-dev openssl keepassx geany gcc g++ cargo apt-file net-tools xsensors hddtemp pkg-config ${deb_pkg_firejail} ${deb_pkg_tor}
     (test $? != 0) && echo "ERROR: install software dependencies by root@node error" && exit 1
     
     echo "# ${0} >> root@${nodealias} >> apt install software dependencies >> try >> success"

@@ -1,8 +1,9 @@
 cc_ticker="BLOCK"
 cc_name_full="blocknet"
 cc_name_prefix="blocknet"
-cc_blockchain_dir=${HOME}"/.blocknet.staking"
-cc_cfg="blocknet.conf"
+cc_name_prefix_upper="Blocknet"
+cc_instance_suffix=".staking"
+#~ cc_cfg="blocknet.conf"
 
 cc_port=""
 cc_rpcport=""
@@ -33,26 +34,10 @@ ukouz7bipuady23p.onion:41412
 fnfzzmvzqngjia3p.onion:41412
 '
 
-cc_firejail_blockchain_dir_path='${HOME}/.blocknet.staking'
-cc_firejail_cfg_file_path=${cc_firejail_blockchain_dir_path}"/"${cc_cfg}
-
-cc_firejail_qt_cfg_dir_path='${HOME}/.config/Blocknet'
-
-cc_firejail_src_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_src/"
-
-cc_firejail_daemon_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"d"
-cc_firejail_cli_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"-cli"
-cc_firejail_qt_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"-qt"
-
-cc_firejail_profile_d=${cc_name_prefix}".staking.d.profile"
-cc_firejail_profile_qt=${cc_name_prefix}".staking.qt.profile"
-cc_firejail_profile_cli=${cc_name_prefix}".staking.cli.profile"
-cc_firejail_profile_make=${cc_name_prefix}".staking.make.profile"
-
 cc_export_CC=""
 cc_export_CXX=""
 
-cc_git_src=""
+cc_git_src_url=""
 cc_git_branch=""
 
 cc_wallet_type=${BLOCKwalletstaking}

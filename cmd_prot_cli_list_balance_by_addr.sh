@@ -1,2 +1,2 @@
 # list balance by address
-cd cli_dir && ./cli_bin -datadir=$HOME/.blockchain_dir/ listaddressgroupings | grep -v -e "\[" -e "\]"
+cc_cli_file_path_eval -datadir=cc_blockchain_dir_path_eval listaddressgroupings | grep -v -e "\[" -e "\]"

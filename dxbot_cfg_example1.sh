@@ -105,6 +105,18 @@ LTCwallet='gui'
 #~ LTCwallet='no'
 #~ LTCwalletrestore="${HOME}/.litecoin/wallet.dat"
 
+# WARNING: before activating LBRY wallet, please consider to edit 
+#    dxbot setup config file dxbot_setup_user_cc_cfg_lbc.sh variables 
+#    cc_blockchain_dir_path_eval= and cc_blockchain_dir_path_noteval= 
+#    to point to SEPARATED SSD storage because LBC chain high IO requirements
+#    otherwise chain sync can take 15+ days.
+ 
+# Lbry credits (LBRY) (LBC) (ODYSEE)
+#~ LBCwallet='gui'
+#~ LBCwallet='daemon'
+LBCwallet='no'
+#~ LBCwalletrestore="${HOME}/.lbrycrd/wallet.dat"
+
 # dash wallet
 DASHwallet='gui'
 #~ DASHwallet='daemon'

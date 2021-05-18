@@ -1,2 +1,2 @@
 # unlock wallet for staking only
-cd cli_dir && ./cli_bin -datadir=$HOME/.blockchain_dir/ -stdinwalletpassphrase walletpassphrase 9999999999
+cc_cli_file_path_eval -datadir=cc_blockchain_dir_path_eval -stdinwalletpassphrase walletpassphrase 9999999999

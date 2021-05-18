@@ -1,2 +1,2 @@
 # get all command help
-cd cli_dir && ./cli_bin -datadir=$HOME/.blockchain_dir/ help
+cc_cli_file_path_eval -datadir=cc_blockchain_dir_path_eval help

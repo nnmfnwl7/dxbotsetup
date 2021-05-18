@@ -1,8 +1,8 @@
 cc_ticker="LBC"
 cc_name_full="lbry"
 cc_name_prefix="lbrycrd"
-cc_blockchain_dir=${HOME}"/.lbrycrd"
-cc_cfg="lbrycrd.conf"
+cc_name_prefix_upper="LBRY"
+cc_instance_suffix=""
 
 cc_port=9246
 cc_rpcport=9245
@@ -29,26 +29,10 @@ cc_nodes_clearnet='
 cc_nodes_tor='
 '
 
-cc_firejail_blockchain_dir_path='${HOME}/.lbrycrd'
-cc_firejail_cfg_file_path=${cc_firejail_blockchain_dir_path}"/"${cc_cfg}
-
-cc_firejail_qt_cfg_dir_path='${HOME}/.config/LBRY'
-
-cc_firejail_src_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_src/"
-
-cc_firejail_daemon_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"d"
-cc_firejail_cli_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"-cli"
-cc_firejail_qt_file_path=${dxbot_dir_remote_root}"/"${cc_name_prefix}"_bin/"${cc_name_prefix}"-qt"
-
-cc_firejail_profile_d=${cc_name_prefix}".d.profile"
-cc_firejail_profile_qt=${cc_name_prefix}".qt.profile"
-cc_firejail_profile_cli=${cc_name_prefix}".cli.profile"
-cc_firejail_profile_make=${cc_name_prefix}".make.profile"
-
 #~ cc_export_CC="clang"
 #~ cc_export_CXX="clang++"
 
-cc_git_src="https://github.com/lbryio/lbrycrd.git"
+cc_git_src_url="https://github.com/lbryio/lbrycrd.git"
 cc_git_branch="origin/v17_master"
 
 cc_wallet_type=${LBCwallet}

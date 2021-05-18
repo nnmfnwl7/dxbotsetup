@@ -12,9 +12,10 @@ if [ ! -f "${dxbot_config_file_arg}" ]; then
     exit 1
 fi
 
-echo "using config file <${dxbot_config_file_arg}>:"
+echo "using config file <"${dxbot_config_file_arg}">:"
 
-source "${dxbot_config_file_arg}"
+source ${dxbot_config_file_arg}
+(test $? != 0) && echo "source file <"${dxbot_config_file_arg}"> not found" && exit 1
 
 # crypto config file name read and include
 dxbot_config_file_arg_cc=$2
@@ -28,9 +29,14 @@ if [ ! -f "${dxbot_config_file_arg_cc}" ]; then
     exit 1
 fi
 
-echo "using config file <${dxbot_config_file_arg_cc}>:"
+echo "using config file <"${dxbot_config_file_arg_cc}">:"
 
-source "${dxbot_config_file_arg_cc}"
+source ${dxbot_config_file_arg_cc}
+(test $? != 0) && echo "source file <"${dxbot_config_file_arg_cc}"> not found" && exit 1
+
+# crypto currency config auto generator include
+source dxbot_node_user_cc_gen_cfg.sh
+(test $? != 0) && echo "source file <dxbot_node_user_cc_gen_cfg.sh> not found" && exit 1
 
 ########################################################################
 echo ""
@@ -63,17 +69,18 @@ if [ "$key" = "c" ]; then
     cd ${dxbot_dir_remote_root}
     (test $? != 0) && echo "cd ${dxbot_dir_remote_root} failed" && exit 1
 
-    mkdir -p ${cc_name_prefix}"_src" && cd ${cc_name_prefix}"_src"
-    (test $? != 0) && echo "mkdir -p ${cc_name_prefix}_src failed" && exit 1
+    mkdir -p ${cc_src_dir_path_eval} && cd ${cc_src_dir_path_eval}
+    (test $? != 0) && echo "mkdir -p ${cc_src_dir_path_eval} failed" && exit 1
 
     # clone source code and checkout branch
-    git clone ${cc_git_src} ./ && git checkout ${cc_git_branch}
+    git clone ${cc_git_src_url} ./ \
+    && git checkout ${cc_git_branch}
     if [ $? != 0 ]; then
         if [ $? == 128 ]; then
             make clean && git pull && git checkout ${cc_git_branch}
             (test $? != 0) && echo "make clean && git pull && checkout origin failed" && exit 1
         else
-            echo "clone and checkout ${cc_git_src} ${cc_git_branch} source code to ${cc_name_prefix}_src failed"
+            echo "clone and checkout ${cc_git_src_url} ${cc_git_branch} source code to ${cc_name_prefix}_src failed"
             exit 1
         fi
     fi
@@ -115,16 +122,17 @@ if [ "$key" = "c" ]; then
     export CXX=""
     
     # mk directory for storing build binary files
-    mkdir -p "./../"${cc_name_prefix}"_bin"
-    (test $? != 0) && echo "${cc_name_full} create binary files dir failed" && exit 1
+    mkdir -p ${cc_bin_dir_path_eval}
+    (test $? != 0) && echo "${cc_bin_dir_path_eval} create binary files dir failed" && exit 1
     
     # copy compiled command line interface and daemon wallet binaries
-    cp "./src/"${cc_name_prefix}"-cli" "./../"${cc_name_prefix}"_bin" && cp "./src/"${cc_name_prefix}"d" "./../"${cc_name_prefix}"_bin"
+    cp "./src/"${cc_name_prefix}"-cli" ${cc_cli_file_path_eval} \
+    && cp "./src/"${cc_name_prefix}"d" ${cc_daemon_file_path_eval}
     (test $? != 0) && echo "${cc_name_full} copy daemon and cli binary files to target dir failed" && exit 1
     
     # copy compiled graphical user interface wallet
     if [ "${cc_wallet_type}" = "gui" ]; then
-        cp "./src/qt/"${cc_name_prefix}"-qt" "./../"${cc_name_prefix}"_bin" || cp "./src/"${cc_name_prefix}"-qt" "./../"${cc_name_prefix}"_bin"
+        cp "./src/qt/"${cc_name_prefix}"-qt" ${cc_qt_file_path_eval} || cp "./src/"${cc_name_prefix}"-qt" ${cc_qt_file_path_eval}
         (test $? != 0) && echo "${cc_name_full} copy QT binary file to target dir failed" && exit 1
     fi
     
