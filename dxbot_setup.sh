@@ -383,24 +383,40 @@ if [ "$key" = "c" ]; then
     
     echo "# ${0} >> ${localuser}@${clientalias} >> copying setup files to ${nodeuser1}@${nodealias} >> try"
     
+    # create remote destination directory where dxbot setup installation files copied
     echo "creating installation directories"
     ssh -o "ControlMaster=auto" -o "ControlPath=~/.ssh/active_sessions/%C" -o "ControlPersist=600" -t ${nodeuser2}@${nodeip} \
     "mkdir -p $dxbot_dir_remote_setup && chmod 700 $dxbot_dir_remote_setup"
     (test $? != 0) && echo "ERROR: failed to create installation directories" && exit 1
     
-    if [ "${BLOCKwalletrestore}" != "" ]; then
-        ps ux | grep -v grep | grep -i -e "blocknet"
-        (test $? = 0) && echo "ERROR: Blocknet wallet.dat file has been set to restore but seems like process is running" && exit 1
+    # copy wallet dat files if set to restore
+    cc_list=`ls | grep dxbot_node_user_cc_cfg_ | grep sh$`
+    for f in $cc_list; do
         
-        cp ${BLOCKwalletrestore} ./blocknet.wallet.dat
-    fi
-    
-    if [ "${LTCwalletrestore}" != "" ]; then
-        ps ux | grep -v grep | grep -i -e "litecoin"
-        (test $? = 0) && echo "ERROR: Litecoin wallet.dat file has been set to restore but seems like progress is running" && exit 1
+        # null previously auto gen cc config variables
+        source dxbot_node_user_cc_null_cfg.sh
+        (test $? != 0) && echo "source file <dxbot_node_user_cc_null_cfg.sh> not found" && exit 1
         
-        cp ${LTCwalletrestore} ./litecoin.wallet.dat
-    fi
+        # load cc config variables
+        source ${f}
+        (test $? != 0) && echo "source file <"${f}"> not found" && exit 1
+
+        # auto gen cc config variables
+        source dxbot_node_user_cc_gen_cfg.sh
+        (test $? != 0) && echo "source file <dxbot_node_user_cc_gen_cfg.sh> not found" && exit 1
+
+        # check if cc wallet restore is enabled
+        if [ "${cc_wallet_restore}" != "" ]; then
+            
+            # check cc process running
+            ps ux | grep -v grep | grep -i -e ${cc_name_prefix}
+            (test $? = 0) && echo "ERROR: ${cc_name_prefix} wallet.dat file has been set to restore but seems like process is running" && exit 1
+            
+            # copy wallet dat file
+            cp ${cc_wallet_restore} "./"${cc_name_prefix}${cc_instance_suffix}".wallet.dat"
+            (test $? = 0) && echo "ERROR: copy ${cc_wallet_restore} to ${cc_name_prefix}${cc_instance_suffix}.wallet.dat failed" && exit 1
+        fi
+    done
     
     echo "packing up all installation files"
     tar -czf ${clientalias}2${nodealias}.tar.gz dxbot_node_root* dxbot_node_user* firejail* cmd* *.wallet.dat ${dxbot_config_file_gen}

@@ -41,6 +41,7 @@ cc_git_src_url=""
 cc_git_branch=""
 
 cc_wallet_type=${BLOCKwalletstaking}
+cc_wallet_restore=${BLOCKwalletstakingrestore}
 
 cc_make_cpu_cores=2
 cc_make_depends=""

@@ -36,6 +36,7 @@ cc_git_src_url="https://github.com/pocketnetteam/pocketnet.core.git"
 cc_git_branch="master"
 
 cc_wallet_type=${PKOINwallet}
+cc_wallet_restore=${PKOINwalletrestore}
 
 cc_make_cpu_cores=2
 cc_make_depends="bdb"

@@ -92,6 +92,7 @@ BLOCKwallet='gui'
 # separated blocknet instance for staking on ~/.blocknet.staking directory
 BLOCKwalletstaking='no'
 #~ BLOCKwalletstaking='gui'
+#~ BLOCKwalletstakingrestore="${HOME}/.blocknet/wallet2.dat"
 
 # bitcoin walet
 BTCwallet='gui' # wallet with qt interface and also as daemon

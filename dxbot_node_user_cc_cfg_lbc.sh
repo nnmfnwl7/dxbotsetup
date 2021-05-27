@@ -36,6 +36,7 @@ cc_git_src_url="https://github.com/lbryio/lbrycrd.git"
 cc_git_branch="origin/v17_master"
 
 cc_wallet_type=${LBCwallet}
+cc_wallet_restore=${LBCwalletrestore}
 
 cc_make_cpu_cores=2
 cc_make_depends="bdb boost"

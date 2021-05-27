@@ -31,6 +31,7 @@ cc_git_src_url="https://github.com/dogecoin/dogecoin.git"
 cc_git_branch="origin/1.14-maint"
 
 cc_wallet_type=${DOGEwallet}
+cc_wallet_restore=${DOGEwalletrestore}
 
 cc_make_cpu_cores=2
 cc_make_depends="bdb"

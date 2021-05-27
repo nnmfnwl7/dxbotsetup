@@ -43,6 +43,7 @@ cc_git_src_url="https://github.com/blocknetdx/blocknet.git"
 cc_git_branch="origin/4.3.1"
 
 cc_wallet_type=${BLOCKwallet}
+cc_wallet_restore=${BLOCKwalletrestore}
 
 cc_make_cpu_cores=2
 cc_make_depends="bdb boost"

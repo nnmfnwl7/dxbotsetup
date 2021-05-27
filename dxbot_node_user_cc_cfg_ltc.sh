@@ -39,6 +39,7 @@ cc_git_src_url="https://github.com/litecoin-project/litecoin.git"
 cc_git_branch="origin/0.18"
 
 cc_wallet_type=${LTCwallet}
+cc_wallet_restore=${LTCwalletrestore}
 
 cc_make_cpu_cores=2
 cc_make_depends="bdb"
