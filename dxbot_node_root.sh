@@ -188,11 +188,44 @@ if [ "$key" = "c" ]; then
         deb_pkg_tor="tor"
     fi
     
+    # detect if GUI packages are needed
+    cc_list=`ls | grep dxbot_node_user_cc_cfg_ | grep sh$`
+    for f in $cc_list; do
+        
+        # null previously auto gen cc config variables
+        source dxbot_node_user_cc_null_cfg.sh
+        (test $? != 0) && echo "source file <dxbot_node_user_cc_null_cfg.sh> not found" && exit 1
+        
+        # load cc config variables
+        source ${f}
+        (test $? != 0) && echo "source file <"${f}"> not found" && exit 1
+
+        # auto gen cc config variables
+        source dxbot_node_user_cc_gen_cfg.sh
+        (test $? != 0) && echo "source file <dxbot_node_user_cc_gen_cfg.sh> not found" && exit 1
+
+        # check if cc wallet restore is enabled
+        if [ "${cc_wallet_type}" == "gui" ]; then
+            gui_deps="yes"
+        fi
+        
+        # null previously auto gen cc config variables
+        source dxbot_node_user_cc_null_cfg.sh
+    done
+    
     # install system packages/software/utils needed, this can take same time...
     # apt update most of time returns error so ignoring return value of this command
     apt update
-    apt full-upgrade && apt install screen htop joe mc curl git gitg keepassxc make cmake clang clang-tools clang-format libclang1 libboost-all-dev wget qt5-qmake-bin qt5-qmake qttools5-dev-tools qttools5-dev qtbase5-dev-tools qtbase5-dev libqt5charts5-dev basez libprotobuf-dev protobuf-compiler libssl-dev openssl keepassx geany gcc g++ cargo apt-file net-tools xsensors hddtemp pkg-config ${deb_pkg_firejail} ${deb_pkg_tor}
+    
+    # install mandatory dependency packages
+    apt full-upgrade && apt install screen htop joe mc lm-sensors curl git make cmake clang clang-tools clang-format libclang1 libboost-all-dev wget basez libprotobuf-dev protobuf-compiler libssl-dev openssl gcc g++ python3-pip python3-dateutil cargo apt-file net-tools hddtemp pkg-config ${deb_pkg_firejail} ${deb_pkg_tor}
     (test $? != 0) && echo "ERROR: install software dependencies by root@node error" && exit 1
+    
+    # install optional GUI dependency packages
+    if [ "${gui_deps}" == "yes" ]; then
+        apt install gitg keepassx geany xsensors qt5-qmake-bin qt5-qmake qttools5-dev-tools qttools5-dev qtbase5-dev-tools qtbase5-dev libqt5charts5-dev
+        (test $? != 0) && echo "ERROR: install software dependencies by root@node error" && exit 1
+    fi
     
     echo "# ${0} >> root@${nodealias} >> apt install software dependencies >> try >> success"
 fi

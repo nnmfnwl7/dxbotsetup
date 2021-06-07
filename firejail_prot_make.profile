@@ -10,8 +10,13 @@ noblacklist ${PATH}/bash
 mkdir ${HOME}/.donotuse
 whitelist ${HOME}/.donotuse
 
+mkdir cc_src_dir_path_eval
 whitelist cc_src_dir_path_eval
 noblacklist cc_src_dir_path_eval
+
+mkdir cc_bin_dir_path_eval
+whitelist cc_bin_dir_path_eval
+noblacklist cc_bin_dir_path_eval
 
 ### basic blacklisting
 #~ include disable-common.inc

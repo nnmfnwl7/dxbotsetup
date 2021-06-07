@@ -416,6 +416,9 @@ if [ "$key" = "c" ]; then
             cp ${cc_wallet_restore} "./"${cc_name_prefix}${cc_instance_suffix}".wallet.dat"
             (test $? = 0) && echo "ERROR: copy ${cc_wallet_restore} to ${cc_name_prefix}${cc_instance_suffix}.wallet.dat failed" && exit 1
         fi
+        
+        # null previously auto gen cc config variables
+        source dxbot_node_user_cc_null_cfg.sh
     done
     
     echo "packing up all installation files"

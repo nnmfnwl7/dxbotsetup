@@ -160,6 +160,7 @@ if [ "$key" = "c" ]; then
                 # search predefined strings to update firejail prototype file for specific cryptocurrency
                 sed -i \
                 -e "s+cc_src_dir_path_eval+${cc_src_dir_path_eval}+g" \
+                -e "s+cc_bin_dir_path_eval+${cc_bin_dir_path_eval}+g" \
                 -e "s/bitcoin/${cc_name_prefix}/g" \
                 -e "s/Bitcoin/${cc_name_prefix}/g" \
                 -e "s/^private-bin/#private-bin/g" \
