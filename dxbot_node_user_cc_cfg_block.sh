@@ -14,6 +14,10 @@ dxnowallets=1
 classic=1
 staking=1
 rpcworkqueue=256
+
+#rpcxbridgetimeout - Timeout for internal XBridge RPC calls (default: 120 seconds)
+# 210 seconds = 3 minutes and 30 seconds
+rpcxbridgetimeout=210
 '
 
 # to boost up sync with some clear net nodes
@@ -43,7 +47,6 @@ cc_git_src_url="https://github.com/blocknetdx/blocknet.git"
 cc_git_branch="origin/4.3.1"
 
 cc_wallet_type=${BLOCKwallet}
-cc_wallet_restore=${BLOCKwalletrestore}
 
 cc_make_cpu_cores=2
 cc_make_depends="bdb boost"
