@@ -130,6 +130,15 @@ if [ "$cc_limit_mem_virtual" == "" ]; then
     echo "gen virtual memory limit >> "${cc_limit_mem_virtual}
 fi
 
+if [ ${sshtoraccess} = "sshtoraccessyes" ] || [ ${torwallet} = "torwalletyes" ] || [ ${torhswallet} = "torhswalletyes" ]; then
+    if [ "$cc_proxychains_bin" == "" ]; then
+        cc_proxychains_bin="proxychains4"
+        echo "gen proxychains binary >> "${cc_proxychains_bin}
+    fi
+else
+    cc_proxychains_bin=
+fi
+
 #~ cc_export_CC="clang"
 #~ cc_export_CXX="clang++"
 
@@ -140,6 +149,11 @@ fi
 
 #~ cc_make_cpu_cores=2
 #~ cc_make_depends="bdb boost"
+
+if [ "${cc_configure_debug_option}" == "" ]; then
+    cc_configure_debug_option="--enable-debug"
+    echo "gen debug option >> "${cc_configure_debug_option}
+fi
 
 #~ cc_configure_gui_yes='./configure LDFLAGS="-L`pwd`/depends/${cc_archdir}/lib/" CPPFLAGS="-I`pwd`/depends/${cc_archdir}/include/" --with-boost-libdir=`pwd`/depends/${cc_archdir}/lib/ --disable-bench --disable-gui-tests --disable-tests --enable-reduce-exports --enable-static --with-gui=auto'
 

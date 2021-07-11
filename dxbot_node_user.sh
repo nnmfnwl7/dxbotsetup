@@ -78,6 +78,12 @@ if [ "$key" = "c" ]; then
     bash ./dxbot_node_user_dxbot.sh
     (test $? != 0) && echo "ERROR: Blocknet dxbot install and configure failed" && exit 1
     
+    cc_list=`ls | grep dxbot_node_user_cc_cfg_ | grep sh$`
+    for f in $cc_list; do
+        bash ./dxbot_node_user_dxbot_cc.sh ${dxbot_config_file_arg} $f
+        (test $? != 0) && echo "ERROR: <$f> wallet configuration file processing failed" && exit 1
+    done
+    
     echo "# ${0} >> ${nodeuser2}@${nodealias} >> checkout and configure dxbot >> try >> success"
 fi
 

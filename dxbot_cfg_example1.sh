@@ -62,6 +62,10 @@ sshtoraccess='sshtoraccessyes'
 rd='rdyes'
 #~ rd='rdno'
 
+# enable disable wallet build with or without debug symbols
+debug='debugno'
+#~ debug='debugyes'
+
 # enabled/disable firejail sandbox for secured build and execution process
 firejail='firejailyes'
 #~ firejail='firejailno'

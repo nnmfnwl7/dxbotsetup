@@ -55,6 +55,8 @@ cc_limit_mem_res=
 
 cc_limit_mem_virtual=
 
+cc_proxychains_bin=
+
 cc_export_CC=
 cc_export_CXX=
 
@@ -67,6 +69,8 @@ cc_wallet_restore=
 
 cc_make_cpu_cores=
 cc_make_depends=
+
+cc_configure_debug_option=
 
 cc_configure_gui_yes=
 

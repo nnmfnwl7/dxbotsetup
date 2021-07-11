@@ -186,6 +186,7 @@ if [ "$key" = "c" ]; then
     # optional tor package
     if [ ${sshtoraccess} = "sshtoraccessyes" ] || [ ${torwallet} = "torwalletyes" ] || [ ${torhswallet} = "torhswalletyes" ]; then
         deb_pkg_tor="tor"
+        deb_pkg_proxychains="proxychains4"
     fi
     
     # detect if GUI packages are needed
@@ -218,7 +219,7 @@ if [ "$key" = "c" ]; then
     apt update
     
     # install mandatory dependency packages
-    apt full-upgrade && apt install screen htop joe mc lm-sensors curl git make cmake clang clang-tools clang-format libclang1 libboost-all-dev wget basez libprotobuf-dev protobuf-compiler libssl-dev openssl gcc g++ python3-pip python3-dateutil cargo apt-file net-tools hddtemp pkg-config ${deb_pkg_firejail} ${deb_pkg_tor}
+    apt full-upgrade && apt install screen htop joe mc lm-sensors curl git make cmake clang clang-tools clang-format libclang1 libboost-all-dev wget basez libprotobuf-dev protobuf-compiler libssl-dev openssl gcc g++ python3-pip python3-dateutil cargo apt-file net-tools hddtemp pkg-config libsecp256k1-0 libsecp256k1-dev ${deb_pkg_firejail} ${deb_pkg_tor} ${deb_pkg_proxychains}
     (test $? != 0) && echo "ERROR: install software dependencies by root@node error" && exit 1
     
     # install optional GUI dependency packages
@@ -489,6 +490,61 @@ if [ "$key" = "c" ]; then
         (test $? != 0) && echo "firejail config file <${firejail_main_cfg}> check failed" && exit 1
         
         echo "# ${0} >> root@${nodealias} >> firejail main config update >> try >> success"
+    fi
+fi
+
+########################################################################
+echo ""
+echo "##################################################################"
+echo "# ${0} >> root@${nodealias} >> proxychains main config update"
+while true; do
+    echo ""
+    read -n 1 -r -p "Press <c> to continue or <s> to skip step or <q> to exit setup process: " key
+    if [ "$key" = "c" ]; then
+        echo -e "\nsetup continue"
+        break
+    elif [ "$key" = "s" ]; then
+        echo -e "\nsetup step skip"
+        break
+    elif [ "$key" = "q" ]; then
+        echo -e "\nsetup cancelled"
+        exit 1
+    fi
+done
+echo ""
+
+if [ "$key" = "c" ]; then
+    if [ ${sshtoraccess} = "sshtoraccessyes" ] || [ ${torwallet} = "torwalletyes" ] || [ ${torhswallet} = "torhswalletyes" ]; then
+        
+        # configuration file path
+        cfg_file="/etc/proxychains4.conf"
+        
+        # updating localhost to be accessible
+        echo "# ${0} >> root@${nodealias} >> proxychains config <${cfg_file}> >> localhost enable"
+        cfg_line="localnet 127\.0\.0\.0\/255\.0\.0\.0"
+        
+        sed -i \
+            -e "s/.*${cfg_line}.*/${cfg_line}/g" \
+            ${cfg_file}
+        (test $? != 0) && echo "proxychains config <${cfg_file}> >> localhost enable >> update failed" && exit 1
+        
+        cat ${cfg_file} | grep -e "${cfg_line}"
+        (test $? != 0) && echo "proxychains config <${cfg_file}> >> localhost enable >> check failed" && exit 1
+        
+        # updating socks4 to socks5
+        echo "# ${0} >> root@${nodealias} >> proxychains config <${cfg_file}> >> socks5 enable"
+        cfg_line_old="socks4 127.0.0.1 9050"
+        cfg_line_new="socks5 127.0.0.1 9050"
+        
+        sed -i \
+            -e "s/${cfg_line_old}/${cfg_line_new}/g" \
+            ${cfg_file}
+        (test $? != 0) && echo "proxychains config <${cfg_file}> >> socks5 enable >> update failed" && exit 1
+        
+        cat ${cfg_file} | grep -e "${cfg_line_new}"
+        (test $? != 0) && echo "proxychains config <${cfg_file}> >> socks5 enable >> check failed" && exit 1
+        
+        echo "# ${0} >> root@${nodealias} >> proxychains config <${cfg_file}> update >> try >> success"
     fi
 fi
 

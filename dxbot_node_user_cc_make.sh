@@ -38,6 +38,11 @@ source ${dxbot_config_file_arg_cc}
 source dxbot_node_user_cc_gen_cfg.sh
 (test $? != 0) && echo "source file <dxbot_node_user_cc_gen_cfg.sh> not found" && exit 1
 
+if [ "${cc_git_src_url}" == "" ]; then
+    echo "cd {cc_git_src_url} is not set, make process skip+success"
+    exit 0
+fi
+
 ########################################################################
 echo ""
 echo "##################################################################"
@@ -73,11 +78,11 @@ if [ "$key" = "c" ]; then
     (test $? != 0) && echo "mkdir -p ${cc_src_dir_path_eval} failed" && exit 1
 
     # clone source code and checkout branch
-    git clone ${cc_git_src_url} ./ \
-    && git checkout ${cc_git_branch}
+    ${cc_proxychains_bin} git clone ${cc_git_src_url} ./ \
+    && ${cc_proxychains_bin} git checkout ${cc_git_branch}
     if [ $? != 0 ]; then
         if [ $? == 128 ]; then
-            make clean && git pull && git checkout ${cc_git_branch}
+            ${cc_proxychains_bin} make clean && ${cc_proxychains_bin} git pull && ${cc_proxychains_bin} git checkout ${cc_git_branch}
             (test $? != 0) && echo "make clean && git pull && checkout origin failed" && exit 1
         else
             echo "clone and checkout ${cc_git_src_url} ${cc_git_branch} source code to ${cc_name_prefix}_src failed"
@@ -96,7 +101,7 @@ if [ "$key" = "c" ]; then
     fi
     
     # build dependencies
-    make -j${cc_make_cpu_cores} -C depends ${cc_make_depends}
+    ${cc_proxychains_bin} make -j${cc_make_cpu_cores} -C depends ${cc_make_depends}
     (test $? != 0) && echo "${cc_name_full} make dependencies failed" && exit 1
     
     cd "depends/built/" && cc_archdir=`ls` && cd ../../
@@ -105,12 +110,19 @@ if [ "$key" = "c" ]; then
     for f in $cc_make_depends; do (tar xvzf "depends/built/"${cc_archdir}"/"${f}"/*.tar.gz" -C "./depends/"${cc_archdir}"/"); done
     (test $? != 0) && echo "blocknet extract dependencies failed" && exit 1
     
+    # check if debug is enabled
+    if [ "${debug}" = "debugyes" ]; then
+        debug_configure_param=${cc_configure_debug_option}
+    else
+        debug_configure_param=
+    fi
+    
     # choose to configure build process with or without graphical user interface 
     if [ "${cc_wallet_type}" = "gui" ]; then
-        eval ${cc_configure_gui_yes}
+        eval ${cc_configure_gui_yes} ${debug_configure_param}
         (test $? != 0) && echo "${cc_name_full} configure script failed" && exit 1
     else
-        eval ${cc_configure_gui_no}
+        eval ${cc_configure_gui_no} ${debug_configure_param}
         (test $? != 0) && echo "${cc_name_full} configure script failed" && exit 1
     fi
 

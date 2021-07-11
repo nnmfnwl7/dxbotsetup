@@ -1,6 +1,56 @@
 #!/bin/bash
 
-source "dxbot_cfg.sh"
+# main config file name read and include
+dxbot_config_file_arg=$1
+if [ "${dxbot_config_file_arg}" = "" ]; then
+    echo "ERROR: first parameter, which is main config file parameter can not be empty"
+    exit 1
+fi
+
+if [ ! -f "${dxbot_config_file_arg}" ]; then
+    echo "ERROR: config file ${dxbot_config_file_arg} does not exist"
+    exit 1
+fi
+
+echo "using config file <"${dxbot_config_file_arg}">:"
+
+source ${dxbot_config_file_arg}
+(test $? != 0) && echo "source file <"${dxbot_config_file_arg}"> not found" && exit 1
+
+# crypto config file name read and include
+dxbot_config_file_arg_cc=$2
+if [ "${dxbot_config_file_arg_cc}" = "" ]; then
+    echo "ERROR: second parameter, which is cryptocurrency config file parameter can not be empty"
+    exit 1
+fi
+
+if [ ! -f "${dxbot_config_file_arg_cc}" ]; then
+    echo "ERROR: config file ${dxbot_config_file_arg_cc} does not exist"
+    exit 1
+fi
+
+echo "using config file <"${dxbot_config_file_arg_cc}">:"
+
+source ${dxbot_config_file_arg_cc}
+(test $? != 0) && echo "source file <"${dxbot_config_file_arg_cc}"> not found" && exit 1
+
+# crypto currency config auto generator include
+source dxbot_node_user_cc_gen_cfg.sh
+(test $? != 0) && echo "source file <dxbot_node_user_cc_gen_cfg.sh> not found" && exit 1
+        
+# skip cc instance if disabled
+if [ "${cc_wallet_type" = "gui" ] || [ "${cc_wallet_type" = "daemon" ]; then
+    echo "<"${cc_name_full}"> on dir <"${cc_blockchain_dir_path_eval}"> is enabled by configuration"
+else
+    echo "<"${cc_name_full}"> on dir <"${cc_blockchain_dir_path_eval}"> has been skipped by configuration"
+    exit 0
+fi
+
+mkdir -p ${cc_root_path_main} && cd ${cc_root_path_main} && chmod 700 .
+(test $? != 0) && echo "<${cc_name_full}> root directory prepare failed" && exit 1
+
+mkdir -p ${cc_root_path_instance} && cd ${cc_root_path_instance} && chmod 700 .
+(test $? != 0) && echo "<${cc_name_full}> instance ${cc_root_path_instance} root directory prepare failed" && exit 1
 
 ########################################################################
 echo ""
@@ -32,10 +82,10 @@ if [ "$key" = "c" ]; then
     mkdir -p dxbot && cd dxbot
     (test $? != 0) && echo "mkdir -p dxbot failed" && exit 1
     
-    git clone https://github.com/nnmfnwl7/dxmakerbot.git .
+    ${cc_proxychains_bin} git clone https://github.com/nnmfnwl7/dxmakerbot.git .
     if [ $? != 0 ]; then
         if [ $? == 128 ]; then
-            git pull
+            ${cc_proxychains_bin} git pull
             (test $? != 0) && echo "git pull failed" && exit 1
         else
             echo "git clone dxbot source code failed"

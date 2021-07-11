@@ -147,6 +147,13 @@ if [ "$rd" != "rdyes" ] && [ "$rd" != "rdno" ]; then
 fi
 echo "using rd: $rd"
 
+# enable debug builds
+if [ "$debug" != "debugyes" ] && [ "$debug" != "debugno" ]; then
+    echo "ERROR: invalid debug input: $debug"
+    exit 1
+fi
+echo "using debug: $debug"
+
 # firejail sandboxing
 if [ "$firejail" != "firejailyes" ] && [ "$firejail" != "firejailno" ]; then
     echo "ERROR: invalid firejail input: $firejail"
